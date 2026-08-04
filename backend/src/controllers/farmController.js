@@ -25,11 +25,22 @@ export const getUserFarm = (req, res) => {
   `).all(req.userId);
   
   const now = new Date();
+  
+  const parseDbDate = (dateStr) => {
+    if (!dateStr) return new Date(0);
+    // SQLite CURRENT_TIMESTAMP 'YYYY-MM-DD HH:MM:SS' — UTC, добавляем Z
+    // ISO строка '2026-08-04T...' — уже с Z
+    if (dateStr.includes('T') || dateStr.endsWith('Z')) {
+      return new Date(dateStr);
+    }
+    return new Date(dateStr + 'Z');
+  };
+  
   const animalsWithStatus = animals.map(animal => {
-    const lastFed = new Date(animal.last_fed);
-    const lastPetted = new Date(animal.last_petted);
-    const hoursSinceFed = (now - lastFed) / (1000 * 60 * 60);
-    const hoursSincePetted = (now - lastPetted) / (1000 * 60 * 60);
+    const lastFed = parseDbDate(animal.last_fed);
+    const lastPetted = parseDbDate(animal.last_petted);
+    const hoursSinceFed = Math.max(0, (now - lastFed) / (1000 * 60 * 60));
+    const hoursSincePetted = Math.max(0, (now - lastPetted) / (1000 * 60 * 60));
     
     return {
       ...animal,

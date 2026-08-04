@@ -12,6 +12,7 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [draggedPositions, setDraggedPositions] = useState({});
   const landCount = inventory.filter(item => item.category === 'land').reduce((sum, item) => sum + (item.quantity || 1), 0);
+  const animalBounds = 9 + landCount * 3;
   const buildingItems = inventory.filter(item => item.category === 'building');
   const decorationItems = inventory.filter(item => item.category === 'decoration');
 
@@ -132,6 +133,7 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
                 key={animal.id}
                 position={[x, 0, z]}
                 animalData={animal}
+                bounds={animalBounds}
               />
             );
           })}

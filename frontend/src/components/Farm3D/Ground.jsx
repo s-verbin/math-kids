@@ -2,10 +2,25 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 
 const Ground = ({ landCount = 0 }) => {
-  // Базовый размер + расширение за каждый купленный участок земли
-  const baseSize = 20;
-  const expansionPerLand = 4;
-  const size = baseSize + (landCount * expansionPerLand);
+  const mainSize = 20;
+  const plotSize = 10;
+
+  // Дополнительные участки вокруг главного
+  const extraPlots = [
+    [15, 0],      // право
+    [0, 15],      // верх
+    [-15, 0],     // лево
+    [0, -15],     // низ
+    [15, 15],     // право-верх
+    [-15, 15],    // лево-верх
+    [15, -15],    // право-низ
+    [-15, -15],   // лево-низ
+    [25, 0],
+    [0, 25],
+    [-25, 0],
+    [0, -25]
+  ];
+  const visiblePlots = extraPlots.slice(0, landCount);
 
   // Процедурная текстура травы
   const grassTexture = useMemo(() => {
@@ -31,21 +46,37 @@ const Ground = ({ landCount = 0 }) => {
     const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    const repeat = Math.max(2, Math.floor(size / 5));
-    texture.repeat.set(repeat, repeat);
+    texture.repeat.set(4, 4);
     
     return texture;
-  }, [size]);
+  }, []);
 
   return (
-    <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
-      <planeGeometry args={[size, size]} />
-      <meshStandardMaterial
-        map={grassTexture}
-        roughness={0.8}
-        metalness={0.2}
-      />
-    </mesh>
+    <group>
+      <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
+        <planeGeometry args={[mainSize, mainSize]} />
+        <meshStandardMaterial
+          map={grassTexture}
+          roughness={0.8}
+          metalness={0.2}
+        />
+      </mesh>
+      {visiblePlots.map((pos, i) => (
+        <mesh
+          key={i}
+          receiveShadow
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[pos[0], -0.02, pos[1]]}
+        >
+          <planeGeometry args={[plotSize, plotSize]} />
+          <meshStandardMaterial
+            map={grassTexture}
+            roughness={0.8}
+            metalness={0.2}
+          />
+        </mesh>
+      ))}
+    </group>
   );
 };
 

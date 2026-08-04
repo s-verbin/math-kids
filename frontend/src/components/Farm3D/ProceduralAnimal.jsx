@@ -142,7 +142,7 @@ const ANIMAL_CONFIGS = {
   }
 };
 
-const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick }) => {
+const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick, bounds = FARM_BOUNDS }) => {
   const groupRef = useRef();
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
@@ -157,8 +157,8 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick }) 
   const config = ANIMAL_CONFIGS[type] || ANIMAL_CONFIGS.pig;
 
   const getNewTarget = () => {
-    const x = (Math.random() - 0.5) * 2 * FARM_BOUNDS;
-    const z = (Math.random() - 0.5) * 2 * FARM_BOUNDS;
+    const x = (Math.random() - 0.5) * 2 * bounds;
+    const z = (Math.random() - 0.5) * 2 * bounds;
     return new THREE.Vector3(x, position[1], z);
   };
 
