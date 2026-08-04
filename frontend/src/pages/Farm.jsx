@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { farmAPI } from '../services/api';
-import { Coins, Heart, Utensils, ShoppingCart, Package } from 'lucide-react';
+import { Coins, Heart, Utensils, ShoppingCart, Package, Box } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import FarmScene from '../components/Farm3D/FarmScene';
 
 const Farm = () => {
   const [myFarm, setMyFarm] = useState(null);
@@ -9,6 +10,7 @@ const Farm = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('farm');
   const [shopCategory, setShopCategory] = useState('animals');
+  const [view3D, setView3D] = useState(true);
 
   useEffect(() => {
     loadData();
@@ -156,6 +158,24 @@ const Farm = () => {
           {/* My Farm Tab */}
           {activeTab === 'farm' && (
             <div>
+              {/* 3D Scene */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-3">
+                  <h2 className="text-xl font-bold text-gray-800">🎨 Вид фермы</h2>
+                  <button
+                    onClick={() => setView3D(!view3D)}
+                    className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg hover:bg-gray-50 transition"
+                  >
+                    <Box size={18} />
+                    {view3D ? '2D Список' : '3D Вид'}
+                  </button>
+                </div>
+                
+                {view3D && (
+                  <FarmScene animals={myFarm.animals} />
+                )}
+              </div>
+
               {myFarm.animals.length === 0 ? (
                 <div className="card text-center py-12">
                   <div className="text-6xl mb-4">🌾</div>
@@ -169,7 +189,7 @@ const Farm = () => {
                     Перейти в магазин
                   </button>
                 </div>
-              ) : (
+              ) : !view3D ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {myFarm.animals.map((animal) => (
                     <div key={animal.id} className="card bg-gradient-to-br from-green-50 to-green-100">
@@ -248,7 +268,7 @@ const Farm = () => {
                     </div>
                   ))}
                 </div>
-              )}
+              ) : null}
 
               {/* Inventory */}
               {myFarm.inventory.length > 0 && (
