@@ -70,6 +70,12 @@ const dbWrapper = {
   run
 };
 
+try {
+  db.exec('ALTER TABLE users ADD COLUMN accepted_terms_at DATETIME;');
+} catch {
+  // Колонка уже существует
+}
+
 dbWrapper.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,6 +87,7 @@ dbWrapper.exec(`
     xp INTEGER DEFAULT 0,
     coins INTEGER DEFAULT 0,
     total_problems_solved INTEGER DEFAULT 0,
+    accepted_terms_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 

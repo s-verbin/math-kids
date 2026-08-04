@@ -3,10 +3,14 @@ import jwt from 'jsonwebtoken';
 import db from '../models/database.js';
 
 export const register = (req, res) => {
-  const { username, password, displayName, avatar } = req.body;
+  const { username, password, displayName, avatar, acceptedTerms } = req.body;
 
   if (!username || !password || !displayName) {
     return res.status(400).json({ error: 'Заполните все поля' });
+  }
+
+  if (!acceptedTerms) {
+    return res.status(400).json({ error: 'Необходимо принять пользовательское соглашение' });
   }
 
   const existingUser = db.prepare('SELECT id FROM users WHERE username = ?').get(username);
@@ -17,9 +21,9 @@ export const register = (req, res) => {
   const hashedPassword = bcrypt.hashSync(password, 10);
 
   const result = db.prepare(`
-    INSERT INTO users (username, password, display_name, avatar)
-    VALUES (?, ?, ?, ?)
-  `).run(username, hashedPassword, displayName, avatar || '😊');
+    INSERT INTO users (username, password, display_name, avatar, accepted_terms_at)
+    VALUES (?, ?, ?, ?, ?)
+  `).run(username, hashedPassword, displayName, avatar || '😊', new Date().toISOString());
 
   const token = jwt.sign({ userId: result.lastInsertRowid }, process.env.JWT_SECRET, {
     expiresIn: '30d'

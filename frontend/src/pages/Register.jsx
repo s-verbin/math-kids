@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserPlus } from 'lucide-react';
+import TermsModal from '../components/TermsModal';
 
 const AVATARS = [
   '😊', '😎', '🤓', '🥳', '🤩', '😺', '🦊', '🐻', '🐼', '🦁', '🐯', '🦄',
@@ -16,16 +17,24 @@ const Register = () => {
   const [selectedAvatar, setSelectedAvatar] = useState('😊');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!acceptedTerms) {
+      setError('Необходимо принять пользовательское соглашение');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await register(username, password, displayName, selectedAvatar);
+      await register(username, password, displayName, selectedAvatar, acceptedTerms);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.error || 'Ошибка регистрации');
@@ -113,6 +122,27 @@ const Register = () => {
             </div>
           </div>
 
+          <div className="flex items-start gap-2">
+            <input
+              id="terms"
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              className="mt-1 h-4 w-4 accent-purple-600"
+              required
+            />
+            <label htmlFor="terms" className="text-sm text-gray-700 leading-relaxed">
+              Я принимаю{' '}
+              <button
+                type="button"
+                onClick={() => setShowTerms(true)}
+                className="text-purple-600 underline hover:text-purple-800"
+              >
+                пользовательское соглашение
+              </button>
+            </label>
+          </div>
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-sm">
               {error}
@@ -128,6 +158,8 @@ const Register = () => {
             {loading ? 'Регистрация...' : 'Зарегистрироваться'}
           </button>
         </form>
+
+        <TermsModal isOpen={showTerms} onClose={() => setShowTerms(false)} />
 
         <div className="mt-4 sm:mt-6 text-center">
           <p className="text-sm sm:text-base text-gray-600">
