@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { userAPI, lessonsAPI } from '../services/api';
-import { Trophy, Target, TrendingUp, Award } from 'lucide-react';
+import { Trophy, Target, TrendingUp, Award, Coins } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 
@@ -108,10 +108,17 @@ const Profile = () => {
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-1 sm:mb-2">{user.displayName}</h1>
                 <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">@{user.username}</p>
                 
-                <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+                <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 mb-3">
                   <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg font-bold text-sm sm:text-base whitespace-nowrap">
                     Уровень {user.level}
                   </div>
+                  <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 py-2 rounded-lg font-bold text-sm sm:text-base whitespace-nowrap flex items-center gap-2">
+                    <Coins size={20} />
+                    {user.coins || 0} монет
+                  </div>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
                   <div className="flex-1 w-full">
                     <div className="flex justify-between text-xs sm:text-sm text-gray-600 mb-1">
                       <span>{xpProgress} XP</span>

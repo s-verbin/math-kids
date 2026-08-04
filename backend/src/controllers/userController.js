@@ -2,7 +2,7 @@ import db from '../models/database.js';
 
 export const getProfile = (req, res) => {
   const user = db.prepare(`
-    SELECT id, username, display_name, avatar, level, xp, total_problems_solved, created_at
+    SELECT id, username, display_name, avatar, level, xp, coins, total_problems_solved, created_at
     FROM users WHERE id = ?
   `).get(req.userId);
 
@@ -55,6 +55,7 @@ export const getProfile = (req, res) => {
       avatar: user.avatar,
       level: user.level,
       xp: user.xp,
+      coins: user.coins,
       totalProblemsSolved: user.total_problems_solved,
       createdAt: user.created_at
     },

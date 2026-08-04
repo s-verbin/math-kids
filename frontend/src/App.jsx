@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import Lesson from './pages/Lesson';
 import Profile from './pages/Profile';
 import Leaderboard from './pages/Leaderboard';
+import Farm from './pages/Farm';
 
 function App() {
   return (
@@ -39,6 +40,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/farm"
+            element={
+              <ProtectedRoute>
+                <Farm />
               </ProtectedRoute>
             }
           />

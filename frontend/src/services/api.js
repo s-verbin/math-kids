@@ -40,4 +40,14 @@ export const lessonsAPI = {
   getAchievements: () => api.get('/lessons/achievements'),
 };
 
+export const farmAPI = {
+  getShop: () => api.get('/farm/shop'),
+  getMyFarm: () => api.get('/farm/my-farm'),
+  buyAnimal: (animalId, name) => api.post('/farm/buy-animal', { animalId, name }),
+  buyItem: (itemId, quantity) => api.post('/farm/buy-item', { itemId, quantity }),
+  feedAnimal: (userAnimalId) => api.post('/farm/feed', { userAnimalId }),
+  petAnimal: (userAnimalId) => api.post('/farm/pet', { userAnimalId }),
+  equipItem: (inventoryId, userAnimalId) => api.post('/farm/equip', { inventoryId, userAnimalId }),
+};
+
 export default api;

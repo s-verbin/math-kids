@@ -79,6 +79,7 @@ dbWrapper.exec(`
     avatar TEXT DEFAULT '😊',
     level INTEGER DEFAULT 1,
     xp INTEGER DEFAULT 0,
+    coins INTEGER DEFAULT 0,
     total_problems_solved INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
@@ -134,6 +135,50 @@ dbWrapper.exec(`
     correct_answers INTEGER DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users(id),
     UNIQUE(user_id, date)
+  );
+
+  CREATE TABLE IF NOT EXISTS farm_animals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL,
+    price INTEGER NOT NULL,
+    description TEXT,
+    model_data TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS farm_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    category TEXT NOT NULL,
+    price INTEGER NOT NULL,
+    description TEXT,
+    model_data TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS user_animals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    animal_id INTEGER NOT NULL,
+    name TEXT,
+    hunger INTEGER DEFAULT 100,
+    happiness INTEGER DEFAULT 100,
+    last_fed DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_petted DATETIME DEFAULT CURRENT_TIMESTAMP,
+    purchased_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (animal_id) REFERENCES farm_animals(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS user_inventory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    item_id INTEGER NOT NULL,
+    quantity INTEGER DEFAULT 1,
+    equipped_on_animal_id INTEGER,
+    purchased_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (item_id) REFERENCES farm_items(id),
+    FOREIGN KEY (equipped_on_animal_id) REFERENCES user_animals(id)
   );
 `);
 
@@ -207,6 +252,58 @@ const insertAchievement = dbWrapper.prepare(`
 
 achievements.forEach(ach => {
   insertAchievement.run(ach.name, ach.description, ach.icon, ach.condition_type, ach.condition_value);
+});
+
+const farmAnimals = [
+  { name: 'Свинья', type: 'pig', price: 100, description: 'Умная и дружелюбная свинья' },
+  { name: 'Лошадь', type: 'horse', price: 300, description: 'Благородная и сильная лошадь' },
+  { name: 'Собака', type: 'dog', price: 150, description: 'Верный друг и охранник' },
+  { name: 'Курица', type: 'chicken', price: 50, description: 'Несёт яйца каждый день' },
+  { name: 'Овца', type: 'sheep', price: 200, description: 'Даёт тёплую шерсть' },
+  { name: 'Корова', type: 'cow', price: 500, description: 'Даёт молоко' },
+  { name: 'Коза', type: 'goat', price: 180, description: 'Даёт молоко и шерсть' },
+  { name: 'Осёл', type: 'donkey', price: 250, description: 'Трудолюбивый помощник' },
+  { name: 'Кот', type: 'cat', price: 120, description: 'Ловит мышей' },
+  { name: 'Утка', type: 'duck', price: 80, description: 'Плавает в пруду' }
+];
+
+const farmItems = [
+  { name: 'Сарай', category: 'building', price: 300, description: 'Укрытие для животных' },
+  { name: 'Забор деревянный', category: 'building', price: 150, description: 'Ограждение участка' },
+  { name: 'Участок земли', category: 'land', price: 500, description: 'Расширение фермы' },
+  { name: 'Кормушка', category: 'building', price: 100, description: 'Для кормления животных' },
+  { name: 'Поилка', category: 'building', price: 80, description: 'Для воды' },
+  { name: 'Стог сена', category: 'decoration', price: 120, description: 'Корм для животных' },
+  { name: 'Мельница', category: 'building', price: 600, description: 'Производит муку' },
+  { name: 'Колодец', category: 'building', price: 200, description: 'Источник воды' },
+  { name: 'Шляпа соломенная', category: 'accessory', price: 50, description: 'Для животных' },
+  { name: 'Бантик красный', category: 'accessory', price: 30, description: 'Украшение' },
+  { name: 'Колокольчик', category: 'accessory', price: 40, description: 'Звенит при движении' },
+  { name: 'Седло', category: 'accessory', price: 150, description: 'Для лошади' },
+  { name: 'Ошейник', category: 'accessory', price: 60, description: 'Для собаки' },
+  { name: 'Цветочный венок', category: 'accessory', price: 45, description: 'Красивое украшение' },
+  { name: 'Фонарь', category: 'decoration', price: 90, description: 'Освещение фермы' },
+  { name: 'Скамейка', category: 'decoration', price: 70, description: 'Место для отдыха' },
+  { name: 'Цветочная клумба', category: 'decoration', price: 100, description: 'Украшает ферму' },
+  { name: 'Пугало', category: 'decoration', price: 110, description: 'Отпугивает птиц' }
+];
+
+const insertAnimal = dbWrapper.prepare(`
+  INSERT OR IGNORE INTO farm_animals (name, type, price, description)
+  VALUES (?, ?, ?, ?)
+`);
+
+const insertItem = dbWrapper.prepare(`
+  INSERT OR IGNORE INTO farm_items (name, category, price, description)
+  VALUES (?, ?, ?, ?)
+`);
+
+farmAnimals.forEach(animal => {
+  insertAnimal.run(animal.name, animal.type, animal.price, animal.description);
+});
+
+farmItems.forEach(item => {
+  insertItem.run(item.name, item.category, item.price, item.description);
 });
 
 export default dbWrapper;

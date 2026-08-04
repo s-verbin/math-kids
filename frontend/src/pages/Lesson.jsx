@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { lessonsAPI, topicsAPI } from '../services/api';
-import { Check, X, Trophy, Home } from 'lucide-react';
+import { topicsAPI, lessonsAPI } from '../services/api';
+import { ArrowLeft, CheckCircle, XCircle, Trophy, Home, Coins } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import NumberKeyboard from '../components/NumberKeyboard';
 
@@ -174,6 +174,14 @@ const Lesson = () => {
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl">
                 <div className="text-4xl font-bold text-blue-600">+{result.xpGained}</div>
                 <div className="text-gray-600 mt-2">Опыта получено</div>
+              </div>
+
+              <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-xl">
+                <div className="text-4xl font-bold text-yellow-600 flex items-center justify-center gap-2">
+                  <Coins size={32} />
+                  +{result.coinsGained || 0}
+                </div>
+                <div className="text-gray-600 mt-2">Монет заработано</div>
               </div>
 
               <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl">

@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, User, Trophy, Home } from 'lucide-react';
+import { LogOut, User, Trophy, Home, Sprout } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -28,6 +28,11 @@ const Navbar = () => {
             <Link to="/" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg active:bg-gray-100 transition touch-manipulation">
               <Home size={18} className="sm:w-5 sm:h-5" />
               <span className="hidden md:inline text-sm">Главная</span>
+            </Link>
+            
+            <Link to="/farm" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg active:bg-green-50 transition touch-manipulation text-green-700">
+              <Sprout size={18} className="sm:w-5 sm:h-5" />
+              <span className="hidden md:inline text-sm">Ферма</span>
             </Link>
             
             <Link to="/leaderboard" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg active:bg-gray-100 transition touch-manipulation">

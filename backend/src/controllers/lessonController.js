@@ -288,16 +288,18 @@ export const submitLesson = (req, res) => {
   `).run(req.userId, topicId, correctCount, totalQuestions, timeSpent || null);
 
   const xpGained = correctCount * 10;
-  const user = db.prepare('SELECT xp, level, total_problems_solved FROM users WHERE id = ?').get(req.userId);
+  const coinsGained = correctCount * 10;
+  const user = db.prepare('SELECT xp, level, coins, total_problems_solved FROM users WHERE id = ?').get(req.userId);
   const newXp = user.xp + xpGained;
+  const newCoins = user.coins + coinsGained;
   const newLevel = Math.floor(newXp / 100) + 1;
   const newTotalProblems = user.total_problems_solved + totalQuestions;
 
   db.prepare(`
     UPDATE users 
-    SET xp = ?, level = ?, total_problems_solved = ?
+    SET xp = ?, level = ?, coins = ?, total_problems_solved = ?
     WHERE id = ?
-  `).run(newXp, newLevel, newTotalProblems, req.userId);
+  `).run(newXp, newLevel, newCoins, newTotalProblems, req.userId);
 
   const today = new Date().toISOString().split('T')[0];
   db.prepare(`
@@ -322,7 +324,9 @@ export const submitLesson = (req, res) => {
     score: correctCount,
     total: totalQuestions,
     xpGained,
+    coinsGained,
     newXp,
+    newCoins,
     newLevel,
     leveledUp,
     accuracy: (correctCount / totalQuestions * 100).toFixed(1)
