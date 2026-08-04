@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar';
 const Home = () => {
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -75,8 +76,47 @@ const Home = () => {
           <p className="text-sm sm:text-base text-gray-600">Начни с простого и двигайся к сложному!</p>
         </div>
 
+        <div className="flex justify-center gap-3 mb-6 sm:mb-8">
+          <button
+            onClick={() => setFilter('all')}
+            className={`px-5 py-2 rounded-xl font-semibold transition ${
+              filter === 'all'
+                ? 'bg-purple-600 text-white shadow-lg'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+            }`}
+          >
+            Все
+          </button>
+          <button
+            onClick={() => setFilter('math')}
+            className={`px-5 py-2 rounded-xl font-semibold transition ${
+              filter === 'math'
+                ? 'bg-blue-600 text-white shadow-lg'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+            }`}
+          >
+            🧮 Математика
+          </button>
+          <button
+            onClick={() => setFilter('russian')}
+            className={`px-5 py-2 rounded-xl font-semibold transition ${
+              filter === 'russian'
+                ? 'bg-green-600 text-white shadow-lg'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+            }`}
+          >
+            📝 Русский
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
-          {topics.map((topic) => {
+          {topics
+            .filter((topic) => {
+              if (filter === 'math') return topic.category !== 'russian';
+              if (filter === 'russian') return topic.category === 'russian';
+              return true;
+            })
+            .map((topic) => {
             const stars = getStars(topic.progress?.bestScore);
             const isCompleted = topic.progress?.attempts > 0;
 

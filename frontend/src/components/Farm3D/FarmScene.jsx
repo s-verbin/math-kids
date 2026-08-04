@@ -10,6 +10,7 @@ import Draggable from './Draggable';
 
 const FarmScene = ({ animals = [], inventory = [] }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [draggedPositions, setDraggedPositions] = useState({});
   const landCount = inventory.filter(item => item.category === 'land').reduce((sum, item) => sum + (item.quantity || 1), 0);
   const buildingItems = inventory.filter(item => item.category === 'building');
   const decorationItems = inventory.filter(item => item.category === 'decoration');
@@ -69,13 +70,16 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
               [-6, 0, -2],
               [6, 0, -2]
             ];
-            const pos = positions[index % positions.length];
+            const pos = draggedPositions[item.id] || positions[index % positions.length];
             return (
               <Draggable
                 key={`building-${item.id}-${index}`}
                 position={pos}
                 onDragStart={() => setIsDragging(true)}
-                onDragEnd={() => setIsDragging(false)}
+                onDragEnd={(newPos) => {
+                  setIsDragging(false);
+                  setDraggedPositions(prev => ({ ...prev, [item.id]: newPos }));
+                }}
               >
                 <FarmBuilding
                   position={[0, 0, 0]}
@@ -95,13 +99,16 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
               [-2, 0, 6],
               [2, 0, 6]
             ];
-            const pos = positions[index % positions.length];
+            const pos = draggedPositions[item.id] || positions[index % positions.length];
             return (
               <Draggable
                 key={`decor-${item.id}-${index}`}
                 position={pos}
                 onDragStart={() => setIsDragging(true)}
-                onDragEnd={() => setIsDragging(false)}
+                onDragEnd={(newPos) => {
+                  setIsDragging(false);
+                  setDraggedPositions(prev => ({ ...prev, [item.id]: newPos }));
+                }}
               >
                 <FarmBuilding
                   position={[0, 0, 0]}

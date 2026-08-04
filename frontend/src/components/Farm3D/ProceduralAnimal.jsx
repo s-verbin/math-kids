@@ -151,6 +151,7 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick }) 
   const targetRef = useRef(new THREE.Vector3(position[0], position[1], position[2]));
   const waitTimeRef = useRef(0);
   const isMovingRef = useRef(false);
+  const legRefs = useRef([]);
 
   const type = animalData?.type || 'pig';
   const config = ANIMAL_CONFIGS[type] || ANIMAL_CONFIGS.pig;
@@ -164,10 +165,9 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick }) 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
     
-    if (!clicked) {
-      // Покачивание вверх-вниз
-      groupRef.current.position.y = posRef.current.y + Math.sin(state.clock.elapsedTime * 2) * 0.05;
-    }
+    // Обновляем позицию
+    groupRef.current.position.x = posRef.current.x;
+    groupRef.current.position.z = posRef.current.z;
     
     if (clicked) return;
     
@@ -179,16 +179,35 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick }) 
       // Двигаемся к цели
       const direction = new THREE.Vector3().subVectors(targetRef.current, posRef.current).normalize();
       const step = speed * delta;
+      const walkTime = state.clock.elapsedTime * 6;
       
       if (dist < step) {
         posRef.current.copy(targetRef.current);
         isMovingRef.current = false;
         waitTimeRef.current = Math.random() * 2 + 1; // ждём 1-3 секунды
+        // Сбрасываем поворот ног
+        legRefs.current.forEach(leg => {
+          if (leg) leg.rotation.x = 0;
+        });
       } else {
         posRef.current.add(direction.multiplyScalar(step));
         // Поворачиваемся в направлении движения
         const angle = Math.atan2(direction.x, direction.z);
         groupRef.current.rotation.y = angle;
+      }
+      
+      // Анимация ходьбы
+      groupRef.current.position.y = posRef.current.y + Math.abs(Math.sin(walkTime)) * 0.08;
+      groupRef.current.rotation.x = Math.sin(walkTime) * 0.05;
+      
+      // Анимация ног - попеременный шаг
+      const legCount = config.legs === 2 ? 2 : 4;
+      for (let i = 0; i < legCount; i++) {
+        const leg = legRefs.current[i];
+        if (leg) {
+          const phase = (i % 2 === 0 ? 0 : Math.PI) + (Math.floor(i / 2) * 0.5);
+          leg.rotation.x = Math.sin(walkTime + phase) * 0.25;
+        }
       }
     } else {
       // Ждём перед новым движением
@@ -197,12 +216,14 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick }) 
         targetRef.current = getNewTarget();
         isMovingRef.current = true;
       }
-      // Лёгкое покачивание
+      // Сбрасываем ноги и лёгкое покачивание
+      legRefs.current.forEach(leg => {
+        if (leg) leg.rotation.x = 0;
+      });
+      groupRef.current.position.y = posRef.current.y + Math.sin(state.clock.elapsedTime * 2) * 0.05;
+      groupRef.current.rotation.x = 0;
       groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
     }
-    
-    groupRef.current.position.x = posRef.current.x;
-    groupRef.current.position.z = posRef.current.z;
   });
 
   const handleClick = (e) => {
@@ -383,7 +404,11 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick }) 
   for (let i = 0; i < legPositions.length; i++) {
     const pos = legPositions[i];
     legs.push(
-      <group key={i} position={pos}>
+      <group
+        key={i}
+        position={pos}
+        ref={(el) => { legRefs.current[i] = el; }}
+      >
         <mesh castShadow position={[0, config.size * 0.25, 0]}>
           <cylinderGeometry args={[0.08, 0.06, config.size * 0.5, 8]} />
           <meshStandardMaterial color={config.darkColor} />

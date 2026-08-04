@@ -273,16 +273,14 @@ const Farm = () => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleFeedAnimal(animal.id)}
-                          disabled={!animal.isHungry}
-                          className="flex-1 py-2 px-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-1 text-sm"
+                          className="flex-1 py-2 px-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-1 text-sm"
                         >
                           <Utensils size={16} />
                           Покормить
                         </button>
                         <button
                           onClick={() => handlePetAnimal(animal.id)}
-                          disabled={!animal.needsPetting}
-                          className="flex-1 py-2 px-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-1 text-sm"
+                          className="flex-1 py-2 px-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition flex items-center justify-center gap-1 text-sm"
                         >
                           <Heart size={16} />
                           Погладить
