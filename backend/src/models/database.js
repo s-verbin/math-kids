@@ -209,18 +209,21 @@ const insertTopic = dbWrapper.prepare(`
   VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `);
 
-topics.forEach(topic => {
-  insertTopic.run(
-    topic.name,
-    topic.description,
-    topic.difficulty,
-    topic.category,
-    topic.min_value,
-    topic.max_value,
-    topic.operations,
-    topic.order_index
-  );
-});
+const existingTopics = dbWrapper.prepare('SELECT COUNT(*) as count FROM topics').get();
+if ((existingTopics?.count || 0) === 0) {
+  topics.forEach(topic => {
+    insertTopic.run(
+      topic.name,
+      topic.description,
+      topic.difficulty,
+      topic.category,
+      topic.min_value,
+      topic.max_value,
+      topic.operations,
+      topic.order_index
+    );
+  });
+}
 
 const achievements = [
   { name: 'Первые шаги', description: 'Решил первый урок', icon: '👶', condition_type: 'lessons_completed', condition_value: 1 },
@@ -250,9 +253,12 @@ const insertAchievement = dbWrapper.prepare(`
   VALUES (?, ?, ?, ?, ?)
 `);
 
-achievements.forEach(ach => {
-  insertAchievement.run(ach.name, ach.description, ach.icon, ach.condition_type, ach.condition_value);
-});
+const existingAchievements = dbWrapper.prepare('SELECT COUNT(*) as count FROM achievements').get();
+if ((existingAchievements?.count || 0) === 0) {
+  achievements.forEach(ach => {
+    insertAchievement.run(ach.name, ach.description, ach.icon, ach.condition_type, ach.condition_value);
+  });
+}
 
 const farmAnimals = [
   { name: 'Свинья', type: 'pig', price: 100, description: 'Умная и дружелюбная свинья' },
