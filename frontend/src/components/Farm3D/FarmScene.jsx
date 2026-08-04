@@ -154,13 +154,15 @@ const Poop = ({ data, onClean }) => {
     <group position={[data.x, 0, data.z]}>
       <mesh
         castShadow
+        receiveShadow
         onClick={(e) => { e.stopPropagation(); onClean(); }}
-        position={[0, data.size * 0.12, 0]}
+        position={[0, data.size * 0.15, 0]}
+        scale={[1, 0.5, 1]}
       >
-        <sphereGeometry args={[data.size * 0.2, 8, 8]} scale={[1, 0.6, 1]} />
-        <meshStandardMaterial color='#5D4037' roughness={1} />
+        <sphereGeometry args={[data.size * 0.22, 12, 12]} />
+        <meshStandardMaterial color='#3E2723' roughness={0.9} metalness={0.05} />
       </mesh>
-      <Html position={[0, data.size * 0.45, 0]} center distanceFactor={10}>
+      <Html position={[0, data.size * 0.5, 0]} center distanceFactor={10}>
         <button
           onClick={onClean}
           style={{
