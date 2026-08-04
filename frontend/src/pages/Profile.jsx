@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { userAPI, lessonsAPI } from '../services/api';
-import { Trophy, Target, TrendingUp, Award, Coins, Clock } from 'lucide-react';
+import { Trophy, Target, TrendingUp, Award, Coins, Clock, Flame } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 
@@ -144,7 +144,7 @@ const Profile = () => {
 
           <div className="card mb-6 sm:mb-8">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">🏅 Личные рекорды</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-3 sm:p-4 rounded-xl">
                 <div className="flex items-center gap-2 mb-2">
                   <Target className="text-pink-600" size={18} />
@@ -167,6 +167,14 @@ const Profile = () => {
                   <span className="text-xs sm:text-sm text-gray-600 font-semibold">Самый быстрый</span>
                 </div>
                 <div className="text-2xl sm:text-3xl font-bold text-blue-600">{formatTime(records.fastestTime)}</div>
+              </div>
+
+              <div className="bg-gradient-to-br from-red-50 to-red-100 p-3 sm:p-4 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <Flame className="text-red-600" size={18} />
+                  <span className="text-xs sm:text-sm text-gray-600 font-semibold">Дней подряд</span>
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold text-red-600">{records.streak}</div>
               </div>
             </div>
           </div>
