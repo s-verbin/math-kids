@@ -151,10 +151,9 @@ const Farm = () => {
           {/* Header */}
           <div className="card mb-6">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">🚜 Моя Ферма</h1>
-                <p className="text-gray-600">Добро пожаловать на Скотный двор!</p>
-              </div>
+            <div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">🚜 Мой счетный двор</h1>
+            </div>
               <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-xl font-bold text-xl flex items-center gap-2">
                 <Coins size={24} />
                 {myFarm.coins}
@@ -172,7 +171,7 @@ const Farm = () => {
                   : 'bg-white text-gray-600 hover:bg-gray-50'
               }`}
             >
-              🐄 Моя Ферма
+              🚜 Мой счетный двор
             </button>
             <button
               onClick={() => setActiveTab('shop')}

@@ -237,7 +237,7 @@ const Lesson = () => {
     <>
       <Navbar />
       <div className="min-h-screen flex flex-col items-center justify-start pt-2 sm:pt-4 p-3 sm:p-4">
-        <div className="card max-w-2xl w-full flex flex-col max-h-[calc(100svh-4rem)] overflow-hidden">
+        <div className="card max-w-2xl w-full flex flex-col max-h-[calc(100svh-5.5rem)] overflow-hidden">
           <div className="mb-2 sm:mb-3">
             <div className="flex justify-between items-center mb-1">
               <h2 className="text-sm sm:text-base font-bold text-gray-700 truncate pr-2">{topic.name}</h2>

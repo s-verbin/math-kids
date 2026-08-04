@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { useState, useRef, useMemo } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, Html } from '@react-three/drei';
 import { Suspense } from 'react';
 import Ground from './Ground';
@@ -8,6 +8,56 @@ import ProceduralAnimal from './ProceduralAnimal';
 import FarmBuilding from './FarmBuilding';
 import Draggable from './Draggable';
 
+const Plants = ({ count = 50 }) => {
+  const refs = useRef([]);
+  const positions = useMemo(() => {
+    return Array.from({ length: count }, (_, i) => {
+      const x = (Math.random() - 0.5) * 16;
+      const z = (Math.random() - 0.5) * 16;
+      const isFlower = Math.random() > 0.7;
+      const colors = ['#FF69B4', '#FFD700', '#9370DB', '#FFA500'];
+      return {
+        x,
+        z,
+        isFlower,
+        color: isFlower ? colors[Math.floor(Math.random() * colors.length)] : null
+      };
+    });
+  }, [count]);
+
+  useFrame((state) => {
+    const time = state.clock.elapsedTime;
+    refs.current.forEach((ref, i) => {
+      if (!ref) return;
+      const growth = 0.7 + 0.3 * (0.5 + 0.5 * Math.sin(time * 0.5 + i));
+      ref.scale.set(growth, growth, growth);
+    });
+  });
+
+  return (
+    <group>
+      {positions.map((p, i) => (
+        <group key={i} position={[p.x, 0, p.z]}>
+          <mesh ref={el => refs.current[i] = el} position={[0, p.isFlower ? 0.12 : 0.08, 0]} castShadow>
+            {p.isFlower ? (
+              <cylinderGeometry args={[0.02, 0.02, 0.24, 6]} />
+            ) : (
+              <coneGeometry args={[0.05, 0.2, 5]} />
+            )}
+            <meshStandardMaterial color={p.isFlower ? '#228B22' : '#32CD32'} />
+          </mesh>
+          {p.isFlower && (
+            <mesh position={[0, 0.3, 0]} castShadow>
+              <sphereGeometry args={[0.07, 6, 6]} />
+              <meshStandardMaterial color={p.color} />
+            </mesh>
+          )}
+        </group>
+      ))}
+    </group>
+  );
+};
+
 const FarmScene = ({ animals = [], inventory = [] }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [draggedPositions, setDraggedPositions] = useState({});
@@ -15,6 +65,7 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
   const animalBounds = 9 + landCount * 3;
   const buildingItems = inventory.filter(item => item.category === 'building');
   const decorationItems = inventory.filter(item => item.category === 'decoration');
+  const accessoryItems = inventory.filter(item => item.category === 'accessory');
 
   return (
     <div className="w-full h-[500px] bg-gradient-to-b from-sky-200 to-sky-100 rounded-xl overflow-hidden shadow-lg">
@@ -60,6 +111,9 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
 
           {/* Земля - расширяется с покупкой участков */}
           <Ground landCount={landCount} />
+
+          {/* Растения */}
+          <Plants count={60} />
 
           {/* Постройки */}
           {buildingItems.map((item, index) => {
@@ -127,12 +181,14 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
             const radius = 2.5;
             const x = Math.cos(angle) * radius;
             const z = Math.sin(angle) * radius;
+            const accessoryData = accessoryItems[index % Math.max(accessoryItems.length, 1)] || null;
             
             return (
               <ProceduralAnimal
                 key={animal.id}
                 position={[x, 0, z]}
                 animalData={animal}
+                accessoryData={accessoryData}
                 bounds={animalBounds}
               />
             );

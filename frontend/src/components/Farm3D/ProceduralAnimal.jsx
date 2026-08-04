@@ -2,6 +2,7 @@ import { useRef, useState, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
+import FarmBuilding from './FarmBuilding';
 
 const FARM_BOUNDS = 9; // Животные не выходят за пределы 20x20 земли
 
@@ -147,7 +148,7 @@ const ANIMAL_CONFIGS = {
   }
 };
 
-const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick, bounds = FARM_BOUNDS }) => {
+const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryData = null, onClick, bounds = FARM_BOUNDS }) => {
   const groupRef = useRef();
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
@@ -160,6 +161,8 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick, bo
 
   const type = animalData?.type || 'pig';
   const config = ANIMAL_CONFIGS[type] || ANIMAL_CONFIGS.pig;
+  const headY = config.size * (1.3 + config.neck);
+  const labelFontSize = Math.max(10, Math.round(12 + config.size * 4));
 
   const getNewTarget = () => {
     const x = (Math.random() - 0.5) * 2 * bounds;
@@ -528,13 +531,13 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick, bo
 
       {/* Имя животного */}
       {animalData?.name && (
-        <Html position={[0, config.size * 2.4, 0]} center distanceFactor={10}>
+        <Html position={[0, headY + 0.5, 0]} center distanceFactor={10}>
           <div style={{
             background: 'rgba(0, 0, 0, 0.7)',
             color: 'white',
-            padding: '4px 10px',
+            padding: '2px 8px',
             borderRadius: '12px',
-            fontSize: '14px',
+            fontSize: `${labelFontSize}px`,
             fontWeight: 'bold',
             whiteSpace: 'nowrap',
             pointerEvents: 'none',
@@ -547,12 +550,19 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick, bo
 
       {/* Индикатор состояния */}
       {(animalData?.isHungry || animalData?.needsPetting) && (
-        <Html position={[0, config.size * 2.8, 0]} center distanceFactor={10}>
-          <div style={{ fontSize: '24px' }}>
+        <Html position={[0, headY + 0.9, 0]} center distanceFactor={10}>
+          <div style={{ fontSize: `${Math.max(16, Math.round(24 * config.size))}px` }}>
             {animalData.isHungry ? '😢' : ''}
             {animalData.needsPetting ? '😔' : ''}
           </div>
         </Html>
+      )}
+
+      {/* Аксессуар */}
+      {accessoryData && (
+        <group position={[0, headY + 0.35, 0]} scale={0.7}>
+          <FarmBuilding itemName={accessoryData.item_name} />
+        </group>
       )}
     </group>
   );

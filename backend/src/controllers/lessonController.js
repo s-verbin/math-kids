@@ -451,7 +451,7 @@ export const submitLesson = (req, res) => {
   const coinsGained = correctCount * 10;
   const user = db.prepare('SELECT xp, level, coins, total_problems_solved FROM users WHERE id = ?').get(req.userId);
   const newXp = user.xp + xpGained;
-  const chestCoins = Math.floor(Math.random() * 15) + 1;
+  const chestCoins = correctCount > 0 ? Math.floor(Math.random() * 15) + 1 : 0;
   const newCoins = user.coins + coinsGained + chestCoins;
   const newLevel = Math.floor(newXp / 100) + 1;
   const newTotalProblems = user.total_problems_solved + totalQuestions;
