@@ -38,6 +38,70 @@ const Path = ({ bounds }) => {
   );
 };
 
+const Critters = ({ count = 12 }) => {
+  const refs = useRef([]);
+  const data = useMemo(() => Array.from({ length: count }, (_, i) => {
+    const type = i % 3 === 0 ? 'bird' : i % 3 === 1 ? 'bee' : 'fly';
+    const center = {
+      x: (Math.random() - 0.5) * 10,
+      y: 1.5 + Math.random() * 3,
+      z: (Math.random() - 0.5) * 10
+    };
+    const speed = 0.4 + Math.random() * 0.6;
+    const radius = 0.6 + Math.random() * 1.5;
+    const phase = Math.random() * Math.PI * 2;
+    return { type, center, speed, radius, phase };
+  }), [count]);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    refs.current.forEach((ref, i) => {
+      if (!ref) return;
+      const d = data[i];
+      const x = d.center.x + Math.cos(t * d.speed + d.phase) * d.radius;
+      const z = d.center.z + Math.sin(t * d.speed + d.phase) * d.radius;
+      const y = d.center.y + Math.sin(t * d.speed * 1.5 + d.phase) * 0.3;
+      ref.position.set(x, y, z);
+      ref.rotation.y = -t * d.speed + d.phase;
+    });
+  });
+
+  return (
+    <group>
+      {data.map((d, i) => (
+        <group key={i} ref={el => refs.current[i] = el}>
+          {d.type === 'bird' ? (
+            <mesh>
+              <coneGeometry args={[0.07, 0.22, 5]} rotation={[Math.PI / 2, 0, 0]} />
+              <meshStandardMaterial color='#ffffff' />
+            </mesh>
+          ) : d.type === 'bee' ? (
+            <>
+              <mesh>
+                <sphereGeometry args={[0.04, 6, 6]} />
+                <meshStandardMaterial color='#FFD700' />
+              </mesh>
+              <mesh position={[-0.05, 0.02, 0]}>
+                <boxGeometry args={[0.07, 0.01, 0.03]} />
+                <meshStandardMaterial color='white' transparent opacity={0.6} />
+              </mesh>
+              <mesh position={[0.05, 0.02, 0]}>
+                <boxGeometry args={[0.07, 0.01, 0.03]} />
+                <meshStandardMaterial color='white' transparent opacity={0.6} />
+              </mesh>
+            </>
+          ) : (
+            <mesh>
+              <sphereGeometry args={[0.02, 4, 4]} />
+              <meshStandardMaterial color='#888888' />
+            </mesh>
+          )}
+        </group>
+      ))}
+    </group>
+  );
+};
+
 const Plants = ({ positions, eatenRef }) => {
   const refs = useRef([]);
 
@@ -174,6 +238,9 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal }) => {
 
           {/* Растения */}
           <Plants positions={plantPositions} eatenRef={eatenRef} />
+
+          {/* Птицы, пчёлы и мухи */}
+          <Critters count={15} />
 
           {/* Постройки */}
           {buildingItems.map((item, index) => {
