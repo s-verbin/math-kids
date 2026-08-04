@@ -102,7 +102,38 @@ const Farm = () => {
     return emojis[type] || '🐾';
   };
 
-  const getCategoryEmoji = (category) => {
+  const getItemEmoji = (itemName, category) => {
+    // Уникальные эмодзи для каждого предмета
+    const itemEmojis = {
+      // Постройки
+      'Сарай': '🏚️',
+      'Забор деревянный': '🪵',
+      'Участок земли': '🟫',
+      'Кормушка': '🍽️',
+      'Поилка': '💧',
+      'Мельница': '🏭',
+      'Колодец': '🪣',
+      
+      // Декорации
+      'Стог сена': '🌾',
+      'Фонарь': '🏮',
+      'Скамейка': '🪑',
+      'Цветочная клумба': '🌺',
+      'Пугало': '🧑‍🌾',
+      
+      // Аксессуары
+      'Шляпа соломенная': '👒',
+      'Бантик красный': '🎀',
+      'Колокольчик': '🔔',
+      'Седло': '🏇',
+      'Ошейник': '🦴',
+      'Цветочный венок': '💐'
+    };
+    
+    return itemEmojis[itemName] || getCategoryEmojiDefault(category);
+  };
+
+  const getCategoryEmojiDefault = (category) => {
     const emojis = {
       building: '🏠',
       land: '🌾',
@@ -270,23 +301,49 @@ const Farm = () => {
                 </div>
               ) : null}
 
-              {/* Inventory */}
-              {myFarm.inventory.length > 0 && (
+              {/* Land & Buildings */}
+              {myFarm.inventory.filter(item => item.category === 'land' || item.category === 'building').length > 0 && (
+                <div className="mt-8">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    🏗️ Постройки и участки
+                  </h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {myFarm.inventory
+                      .filter(item => item.category === 'land' || item.category === 'building')
+                      .map((item) => (
+                        <div key={item.id} className="card bg-gradient-to-br from-amber-50 to-amber-100 p-4">
+                          <div className="text-center">
+                            <div className="text-5xl mb-2">{getItemEmoji(item.item_name, item.category)}</div>
+                            <div className="text-sm font-bold text-gray-800">{item.item_name}</div>
+                            {item.quantity > 1 && (
+                              <div className="text-xs text-gray-600 mt-1">Количество: {item.quantity}</div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Decorations & Accessories Inventory */}
+              {myFarm.inventory.filter(item => item.category === 'decoration' || item.category === 'accessory').length > 0 && (
                 <div className="mt-8">
                   <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                     <Package size={24} />
-                    Инвентарь
+                    Декорации и аксессуары
                   </h2>
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                    {myFarm.inventory.map((item) => (
-                      <div key={item.id} className="card text-center p-3">
-                        <div className="text-3xl mb-1">{getCategoryEmoji(item.category)}</div>
-                        <div className="text-xs font-semibold text-gray-700">{item.item_name}</div>
-                        {item.quantity > 1 && (
-                          <div className="text-xs text-gray-500 mt-1">x{item.quantity}</div>
-                        )}
-                      </div>
-                    ))}
+                    {myFarm.inventory
+                      .filter(item => item.category === 'decoration' || item.category === 'accessory')
+                      .map((item) => (
+                        <div key={item.id} className="card text-center p-3">
+                          <div className="text-3xl mb-1">{getItemEmoji(item.item_name, item.category)}</div>
+                          <div className="text-xs font-semibold text-gray-700">{item.item_name}</div>
+                          {item.quantity > 1 && (
+                            <div className="text-xs text-gray-500 mt-1">x{item.quantity}</div>
+                          )}
+                        </div>
+                      ))}
                   </div>
                 </div>
               )}
@@ -307,6 +364,16 @@ const Farm = () => {
                   }`}
                 >
                   🐄 Животные
+                </button>
+                <button
+                  onClick={() => setShopCategory('land')}
+                  className={`py-2 px-4 rounded-lg font-semibold whitespace-nowrap transition ${
+                    shopCategory === 'land'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  🟫 Земля
                 </button>
                 <button
                   onClick={() => setShopCategory('building')}
@@ -371,7 +438,7 @@ const Farm = () => {
                     .map((item) => (
                       <div key={item.id} className="card hover:shadow-lg transition">
                         <div className="text-center mb-3">
-                          <div className="text-4xl mb-2">{getCategoryEmoji(item.category)}</div>
+                          <div className="text-4xl mb-2">{getItemEmoji(item.name, item.category)}</div>
                           <h3 className="text-sm font-bold text-gray-800">{item.name}</h3>
                           <p className="text-xs text-gray-600 mt-1">{item.description}</p>
                         </div>
