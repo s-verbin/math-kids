@@ -1,4 +1,3 @@
-import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 
 const LandPlot = ({ position = [0, 0, 0], itemName = 'Участок земли' }) => {
@@ -33,22 +32,6 @@ const LandPlot = ({ position = [0, 0, 0], itemName = 'Участок земли'
         <boxGeometry args={[0.1, 0.08, 1]} />
         <meshStandardMaterial color="#A0522D" />
       </mesh>
-
-      {/* Надпись */}
-      <Html position={[0, 0.5, 0]} center distanceFactor={10}>
-        <div style={{
-          background: 'rgba(139, 115, 85, 0.9)',
-          color: 'white',
-          padding: '3px 8px',
-          borderRadius: '6px',
-          fontSize: '11px',
-          fontWeight: 'bold',
-          whiteSpace: 'nowrap',
-          pointerEvents: 'none'
-        }}>
-          🟫 {itemName}
-        </div>
-      </Html>
     </group>
   );
 };

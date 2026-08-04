@@ -1,4 +1,3 @@
-import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 
 const FarmBuilding = ({ position = [0, 0, 0], itemName = 'Постройка', isDecoration = false }) => {
@@ -94,21 +93,6 @@ const FarmBuilding = ({ position = [0, 0, 0], itemName = 'Постройка', i
         </>
       )}
 
-      {/* Надпись */}
-      <Html position={[0, config.height + (config.roof === 'none' ? 0.4 : 0.8), 0]} center distanceFactor={10}>
-        <div style={{
-          background: isDecoration ? 'rgba(255, 105, 180, 0.9)' : 'rgba(70, 70, 70, 0.85)',
-          color: 'white',
-          padding: '3px 8px',
-          borderRadius: '6px',
-          fontSize: '11px',
-          fontWeight: 'bold',
-          whiteSpace: 'nowrap',
-          pointerEvents: 'none'
-        }}>
-          {itemName}
-        </div>
-      </Html>
     </group>
   );
 };

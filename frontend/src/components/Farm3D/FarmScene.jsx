@@ -2,12 +2,13 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, Html } from '@react-three/drei';
 import { Suspense } from 'react';
 import Ground from './Ground';
+import Background from './Background';
 import ProceduralAnimal from './ProceduralAnimal';
-import LandPlot from './LandPlot';
 import FarmBuilding from './FarmBuilding';
+import Draggable from './Draggable';
 
 const FarmScene = ({ animals = [], inventory = [] }) => {
-  const landItems = inventory.filter(item => item.category === 'land');
+  const landCount = inventory.filter(item => item.category === 'land').reduce((sum, item) => sum + (item.quantity || 1), 0);
   const buildingItems = inventory.filter(item => item.category === 'building');
   const decorationItems = inventory.filter(item => item.category === 'decoration');
 
@@ -49,30 +50,11 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
             intensity={0.3}
           />
 
-          {/* Земля */}
-          <Ground />
+          {/* Фон - поля и горы */}
+          <Background />
 
-          {/* Участки земли */}
-          {landItems.map((item, index) => {
-            const positions = [
-              [-5, 0, -5],
-              [-5, 0, 5],
-              [5, 0, -5],
-              [5, 0, 5],
-              [-3, 0, -7],
-              [3, 0, -7],
-              [-7, 0, 0],
-              [7, 0, 0]
-            ];
-            const pos = positions[index % positions.length];
-            return (
-              <LandPlot
-                key={`${item.id}-${index}`}
-                position={pos}
-                itemName={item.item_name}
-              />
-            );
-          })}
+          {/* Земля - расширяется с покупкой участков */}
+          <Ground landCount={landCount} />
 
           {/* Постройки */}
           {buildingItems.map((item, index) => {
@@ -86,11 +68,12 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
             ];
             const pos = positions[index % positions.length];
             return (
-              <FarmBuilding
-                key={`${item.id}-${index}`}
-                position={pos}
-                itemName={item.item_name}
-              />
+              <Draggable key={`building-${item.id}-${index}`} position={pos}>
+                <FarmBuilding
+                  position={[0, 0, 0]}
+                  itemName={item.item_name}
+                />
+              </Draggable>
             );
           })}
 
@@ -106,12 +89,13 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
             ];
             const pos = positions[index % positions.length];
             return (
-              <FarmBuilding
-                key={`${item.id}-${index}`}
-                position={pos}
-                itemName={item.item_name}
-                isDecoration={true}
-              />
+              <Draggable key={`decor-${item.id}-${index}`} position={pos}>
+                <FarmBuilding
+                  position={[0, 0, 0]}
+                  itemName={item.item_name}
+                  isDecoration={true}
+                />
+              </Draggable>
             );
           })}
 

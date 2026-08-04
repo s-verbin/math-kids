@@ -43,6 +43,7 @@ const Lesson = () => {
 
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
+    if (feedback || !problems[currentIndex]) return;
     
     const currentProblem = problems[currentIndex];
     const isRussian = currentProblem?.type === 'russian';

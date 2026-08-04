@@ -3,6 +3,8 @@ import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 
+const FARM_BOUNDS = 9; // Животные не выходят за пределы 20x20 земли
+
 // Конфигурации для каждого животного
 const ANIMAL_CONFIGS = {
   pig: {
@@ -144,15 +146,63 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick }) 
   const groupRef = useRef();
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
+  
+  const posRef = useRef(new THREE.Vector3(position[0], position[1], position[2]));
+  const targetRef = useRef(new THREE.Vector3(position[0], position[1], position[2]));
+  const waitTimeRef = useRef(0);
+  const isMovingRef = useRef(false);
 
   const type = animalData?.type || 'pig';
   const config = ANIMAL_CONFIGS[type] || ANIMAL_CONFIGS.pig;
 
-  useFrame((state) => {
-    if (groupRef.current && !clicked) {
-      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
-      groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.05;
+  const getNewTarget = () => {
+    const x = (Math.random() - 0.5) * 2 * FARM_BOUNDS;
+    const z = (Math.random() - 0.5) * 2 * FARM_BOUNDS;
+    return new THREE.Vector3(x, position[1], z);
+  };
+
+  useFrame((state, delta) => {
+    if (!groupRef.current) return;
+    
+    if (!clicked) {
+      // Покачивание вверх-вниз
+      groupRef.current.position.y = posRef.current.y + Math.sin(state.clock.elapsedTime * 2) * 0.05;
     }
+    
+    if (clicked) return;
+    
+    // Случайное движение
+    const speed = 0.4; // медленно
+    const dist = posRef.current.distanceTo(targetRef.current);
+    
+    if (isMovingRef.current) {
+      // Двигаемся к цели
+      const direction = new THREE.Vector3().subVectors(targetRef.current, posRef.current).normalize();
+      const step = speed * delta;
+      
+      if (dist < step) {
+        posRef.current.copy(targetRef.current);
+        isMovingRef.current = false;
+        waitTimeRef.current = Math.random() * 2 + 1; // ждём 1-3 секунды
+      } else {
+        posRef.current.add(direction.multiplyScalar(step));
+        // Поворачиваемся в направлении движения
+        const angle = Math.atan2(direction.x, direction.z);
+        groupRef.current.rotation.y = angle + Math.PI;
+      }
+    } else {
+      // Ждём перед новым движением
+      waitTimeRef.current -= delta;
+      if (waitTimeRef.current <= 0) {
+        targetRef.current = getNewTarget();
+        isMovingRef.current = true;
+      }
+      // Лёгкое покачивание
+      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
+    }
+    
+    groupRef.current.position.x = posRef.current.x;
+    groupRef.current.position.z = posRef.current.z;
   });
 
   const handleClick = (e) => {

@@ -1,7 +1,12 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
 
-const Ground = () => {
+const Ground = ({ landCount = 0 }) => {
+  // Базовый размер + расширение за каждый купленный участок земли
+  const baseSize = 20;
+  const expansionPerLand = 4;
+  const size = baseSize + (landCount * expansionPerLand);
+
   // Процедурная текстура травы
   const grassTexture = useMemo(() => {
     const canvas = document.createElement('canvas');
@@ -26,14 +31,15 @@ const Ground = () => {
     const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(4, 4);
+    const repeat = Math.max(2, Math.floor(size / 5));
+    texture.repeat.set(repeat, repeat);
     
     return texture;
-  }, []);
+  }, [size]);
 
   return (
     <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
-      <planeGeometry args={[20, 20]} />
+      <planeGeometry args={[size, size]} />
       <meshStandardMaterial
         map={grassTexture}
         roughness={0.8}
