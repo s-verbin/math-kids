@@ -12,9 +12,9 @@ const ANIMAL_CONFIGS = {
     bodyColor: '#ffb6c1',
     darkColor: '#e8a5a5',
     snoutColor: '#ff9999',
-    size: 0.6,
-    bodyScale: [1, 0.8, 1.1],
-    headSize: 0.4,
+    size: 0.62,
+    bodyScale: [1.05, 0.85, 1.25],
+    headSize: 0.38,
     ears: 'pointed',
     tail: 'curly',
     legs: 4,
@@ -25,67 +25,71 @@ const ANIMAL_CONFIGS = {
     bodyColor: '#fff8dc',
     darkColor: '#f0e68c',
     snoutColor: '#ff6b35',
-    size: 0.35,
-    bodyScale: [0.7, 0.9, 0.9],
-    headSize: 0.22,
+    size: 0.28,
+    bodyScale: [0.65, 0.85, 0.85],
+    headSize: 0.18,
     ears: 'comb',
     tail: 'feathers',
     legs: 2,
-    neck: 0.25
+    neck: 0.22,
+    wings: true
   },
   cow: {
     color: '#f5f5f5',
     bodyColor: '#f5f5f5',
     darkColor: '#333333',
     snoutColor: '#ff9999',
-    size: 0.75,
-    bodyScale: [1.1, 1, 1.3],
-    headSize: 0.48,
+    size: 1.0,
+    bodyScale: [1.4, 1.1, 1.8],
+    headSize: 0.55,
     ears: 'flat',
     tail: 'thin',
     legs: 4,
     neck: 0.2,
-    spots: true
+    spots: true,
+    udder: true
   },
   horse: {
     color: '#8b4513',
     bodyColor: '#8b4513',
     darkColor: '#5c2e0c',
     snoutColor: '#3d3d3d',
-    size: 0.7,
-    bodyScale: [1, 1.1, 1.4],
-    headSize: 0.45,
+    size: 0.95,
+    bodyScale: [1.15, 1.2, 1.7],
+    headSize: 0.5,
     ears: 'long',
     tail: 'hair',
     legs: 4,
-    neck: 0.35
+    neck: 0.4
   },
   sheep: {
     color: '#fffaf0',
     bodyColor: '#fffaf0',
     darkColor: '#e6e0d4',
     snoutColor: '#333333',
-    size: 0.6,
-    bodyScale: [1.1, 0.9, 1.1],
-    headSize: 0.35,
+    size: 0.58,
+    bodyScale: [1.25, 1.0, 1.25],
+    headSize: 0.32,
     ears: 'flat',
     tail: 'small',
     legs: 4,
     neck: 0.15,
-    fluffy: true
+    fluffy: true,
+    wool: true
   },
   duck: {
     color: '#fff8dc',
     bodyColor: '#fff8dc',
     darkColor: '#90ee90',
     snoutColor: '#ff6b35',
-    size: 0.35,
-    bodyScale: [0.7, 0.7, 1],
-    headSize: 0.22,
+    size: 0.25,
+    bodyScale: [0.6, 0.7, 0.9],
+    headSize: 0.16,
     ears: 'none',
     tail: 'feathers',
     legs: 2,
-    neck: 0.2
+    neck: 0.18,
+    wings: true
   },
   dog: {
     color: '#d2691e',
@@ -93,21 +97,21 @@ const ANIMAL_CONFIGS = {
     darkColor: '#8b4513',
     snoutColor: '#333333',
     size: 0.55,
-    bodyScale: [0.9, 0.9, 1.2],
-    headSize: 0.38,
+    bodyScale: [1.0, 0.9, 1.3],
+    headSize: 0.35,
     ears: 'floppy',
     tail: 'curly',
     legs: 4,
-    neck: 0.2
+    neck: 0.22
   },
   cat: {
     color: '#ff8c00',
     bodyColor: '#ff8c00',
     darkColor: '#cc7000',
     snoutColor: '#ff9999',
-    size: 0.4,
-    bodyScale: [0.8, 0.7, 1.1],
-    headSize: 0.32,
+    size: 0.38,
+    bodyScale: [0.85, 0.75, 1.15],
+    headSize: 0.28,
     ears: 'pointed',
     tail: 'long',
     legs: 4,
@@ -118,23 +122,24 @@ const ANIMAL_CONFIGS = {
     bodyColor: '#f5deb3',
     darkColor: '#d2b48c',
     snoutColor: '#ff9999',
-    size: 0.55,
-    bodyScale: [0.9, 0.9, 1.15],
-    headSize: 0.36,
+    size: 0.58,
+    bodyScale: [1.0, 1.0, 1.25],
+    headSize: 0.34,
     ears: 'flat',
     tail: 'short',
     legs: 4,
     neck: 0.25,
-    horns: true
+    horns: true,
+    beard: true
   },
   donkey: {
     color: '#a9a9a9',
     bodyColor: '#a9a9a9',
     darkColor: '#696969',
     snoutColor: '#4a4a4a',
-    size: 0.65,
-    bodyScale: [1, 1, 1.3],
-    headSize: 0.42,
+    size: 0.72,
+    bodyScale: [1.05, 1.1, 1.45],
+    headSize: 0.4,
     ears: 'long',
     tail: 'hair',
     legs: 4,
@@ -359,6 +364,34 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick, bo
     </>
   );
 
+  // Дополнительные детали
+  const wings = config.wings && (
+    <>
+      <mesh castShadow position={[-config.size * 0.65, config.size * 1.15, 0]} rotation={[0, 0, -0.3]}>
+        <boxGeometry args={[config.size * 0.22, config.size * 0.08, config.size * 0.5]} />
+        <meshStandardMaterial color={config.darkColor} />
+      </mesh>
+      <mesh castShadow position={[config.size * 0.65, config.size * 1.15, 0]} rotation={[0, 0, 0.3]}>
+        <boxGeometry args={[config.size * 0.22, config.size * 0.08, config.size * 0.5]} />
+        <meshStandardMaterial color={config.darkColor} />
+      </mesh>
+    </>
+  );
+
+  const udder = config.udder && (
+    <mesh castShadow position={[0, config.size * 0.75, -config.size * 0.25]}>
+      <sphereGeometry args={[config.size * 0.28, 12, 12]} />
+      <meshStandardMaterial color='#ffacc7' />
+    </mesh>
+  );
+
+  const beard = config.beard && (
+    <mesh castShadow position={[0, config.size * (1.05 + config.neck), config.size * (0.65 + config.headSize * 0.45)]}>
+      <coneGeometry args={[0.05, 0.12, 8]} rotation={[Math.PI / 2, 0, 0]} />
+      <meshStandardMaterial color='#d2b48c' />
+    </mesh>
+  );
+
   // Хвост
   const renderTail = () => {
     switch (config.tail) {
@@ -489,6 +522,9 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick, bo
       {horns}
       {renderTail()}
       {legs}
+      {wings}
+      {udder}
+      {beard}
 
       {/* Имя животного */}
       {animalData?.name && (
