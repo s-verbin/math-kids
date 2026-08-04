@@ -3,12 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import { topicsAPI } from '../services/api';
 import { Play, Star, Lock } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import { useAuth } from '../context/AuthContext';
 
 const Home = () => {
+  const { user } = useAuth();
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [showDaily, setShowDaily] = useState(user?.dailyReward > 0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (showDaily) {
+      const timer = setTimeout(() => setShowDaily(false), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [showDaily]);
 
   useEffect(() => {
     loadTopics();
@@ -54,6 +64,8 @@ const Home = () => {
     return 0;
   };
 
+  const weakTopics = topics.filter((t) => t.progress?.attempts > 0 && (t.progress?.bestScore || 0) < 7);
+
   if (loading) {
     return (
       <>
@@ -72,6 +84,16 @@ const Home = () => {
     <>
       <Navbar />
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-20 sm:pb-8">
+        {showDaily && (
+          <div className="mb-4 sm:mb-6 bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-4 rounded-2xl shadow-lg text-center animate-pulse">
+            <div className="text-3xl mb-1">🎁</div>
+            <div className="text-lg font-bold">Ежедневная награда!</div>
+            <div className="text-sm">
+              +{user.dailyReward} монет, серия {user.streak} дней 🔥
+            </div>
+          </div>
+        )}
+
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-2">Выбери тему</h1>
           <p className="text-sm sm:text-base text-gray-600">Начни с простого и двигайся к сложному!</p>
@@ -177,6 +199,33 @@ const Home = () => {
             );
           })}
         </div>
+
+        {weakTopics.length > 0 && (
+          <div className="max-w-6xl mx-auto mt-6 sm:mt-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">📚 Потренируй, где ошибаешься</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {weakTopics.map((topic) => (
+                <div
+                  key={topic.id}
+                  className="card active:scale-95 transition-transform cursor-pointer touch-manipulation"
+                  onClick={() => navigate(`/lesson/${topic.id}`)}
+                >
+                  <div className="flex items-start justify-between mb-3 sm:mb-4">
+                    <div className="text-4xl sm:text-5xl">{getCategoryIcon(topic.category)}</div>
+                    <div className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold ${getDifficultyColor(topic.difficulty)}`}>
+                      Ур. {topic.difficulty}
+                    </div>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">{topic.name}</h3>
+                  <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4">{topic.description}</p>
+                  <div className="text-sm text-red-600 font-semibold">
+                    Лучший: {topic.progress.bestScore}/10
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

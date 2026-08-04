@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { userAPI, lessonsAPI } from '../services/api';
-import { Trophy, Target, TrendingUp, Award, Coins, Clock, Flame } from 'lucide-react';
+import { Trophy, Target, TrendingUp, Award, Coins, Clock, Flame, Users } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,12 +10,15 @@ const AVATARS = [
   '🚀', '⚡', '🌟', '🔥', '💎', '🎯', '🎨', '🎭', '🎪', '🎸', '🎮', '⚽'
 ];
 
+const getAvatarLevel = (index) => Math.max(1, Math.floor(index / 4) + 1);
+
 const Profile = () => {
   const { setUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [parentMode, setParentMode] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -97,15 +100,30 @@ const Profile = () => {
                 </div>
                 {showAvatarPicker && (
                   <div className="absolute top-full left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 mt-2 bg-white rounded-xl shadow-xl p-3 sm:p-4 grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 z-10 max-h-96 overflow-y-auto">
-                    {AVATARS.map((avatar) => (
-                      <button
-                        key={avatar}
-                        onClick={() => handleAvatarChange(avatar)}
-                        className="text-2xl sm:text-3xl p-2 rounded-lg active:bg-gray-100 transition touch-manipulation hover:scale-110"
-                      >
-                        {avatar}
-                      </button>
-                    ))}
+                    {AVATARS.map((avatar, index) => {
+                      const requiredLevel = getAvatarLevel(index);
+                      const isLocked = user.level < requiredLevel;
+                      return (
+                        <button
+                          key={avatar}
+                          disabled={isLocked}
+                          onClick={() => !isLocked && handleAvatarChange(avatar)}
+                          className={`relative text-2xl sm:text-3xl p-2 rounded-lg transition touch-manipulation ${
+                            isLocked
+                              ? 'opacity-40 grayscale cursor-not-allowed'
+                              : 'active:bg-gray-100 hover:scale-110'
+                          }`}
+                          title={isLocked ? `Доступен с уровня ${requiredLevel}` : ''}
+                        >
+                          {avatar}
+                          {isLocked && (
+                            <span className="absolute -top-1 -right-1 text-[10px] bg-gray-800 text-white rounded-full w-5 h-5 flex items-center justify-center">
+                              {requiredLevel}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -177,6 +195,47 @@ const Profile = () => {
                 <div className="text-2xl sm:text-3xl font-bold text-red-600">{records.streak}</div>
               </div>
             </div>
+          </div>
+
+          <div className="card mb-6 sm:mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800">👨‍👩‍👧 Родительский взгляд</h2>
+              <button
+                onClick={() => setParentMode(!parentMode)}
+                className="text-sm sm:text-base px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-semibold hover:bg-blue-200 transition"
+              >
+                {parentMode ? 'Скрыть' : 'Показать'}
+              </button>
+            </div>
+
+            {parentMode && (
+              <div className="space-y-4 text-sm sm:text-base text-gray-700">
+                <p><strong>Ребёнок:</strong> {user.displayName}</p>
+                <p><strong>Уровень:</strong> {user.level}</p>
+                <p><strong>Всего примеров:</strong> {user.totalProblemsSolved}</p>
+                <p><strong>Уроков:</strong> {stats.totalLessons}</p>
+                <p><strong>Средняя точность:</strong> {stats.avgAccuracy.toFixed(0)}%</p>
+                <p><strong>Идеальных уроков:</strong> {records.perfectLessons}</p>
+                <p><strong>Дней подряд:</strong> {records.streak}</p>
+                <p><strong>Последние уроки:</strong></p>
+                <ul className="list-disc list-inside space-y-1 pl-2">
+                  {recentLessons.slice(0, 5).map((lesson) => (
+                    <li key={lesson.id}>
+                      {lesson.topic_name}: {lesson.score}/{lesson.total_questions} ({new Date(lesson.completed_at).toLocaleDateString('ru-RU')})
+                    </li>
+                  ))}
+                </ul>
+                <p><strong>Активность за неделю:</strong></p>
+                <div className="flex gap-2 flex-wrap">
+                  {dailyStats.map((day) => (
+                    <div key={day.date} className="bg-blue-50 px-3 py-2 rounded-lg text-center">
+                      <div className="text-xs text-gray-500">{new Date(day.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}</div>
+                      <div className="font-bold text-blue-600">{day.problems_solved}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">

@@ -53,15 +53,50 @@ export const login = (req, res) => {
     expiresIn: '30d'
   });
 
+  const today = new Date().toISOString().split('T')[0];
+  const existingReward = db.prepare(`
+    SELECT * FROM daily_rewards WHERE user_id = ? AND date = ?
+  `).get(user.id, today);
+
+  let dailyReward = 0;
+  let streak = 0;
+
+  if (!existingReward) {
+    const yesterday = new Date();
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+    const yest = yesterday.toISOString().split('T')[0];
+
+    const yestReward = db.prepare(`
+      SELECT * FROM daily_rewards WHERE user_id = ? AND date = ?
+    `).get(user.id, yest);
+
+    streak = yestReward ? yestReward.streak + 1 : 1;
+    dailyReward = 10 + (streak * 2);
+
+    db.prepare(`
+      INSERT INTO daily_rewards (user_id, date, streak, coins)
+      VALUES (?, ?, ?, ?)
+    `).run(user.id, today, streak, dailyReward);
+
+    db.prepare('UPDATE users SET coins = coins + ? WHERE id = ?').run(dailyReward, user.id);
+  } else {
+    streak = existingReward.streak;
+  }
+
+  const updatedUser = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
+
   res.json({
     token,
     user: {
-      id: user.id,
-      username: user.username,
-      displayName: user.display_name,
-      avatar: user.avatar,
-      level: user.level,
-      xp: user.xp
+      id: updatedUser.id,
+      username: updatedUser.username,
+      displayName: updatedUser.display_name,
+      avatar: updatedUser.avatar,
+      level: updatedUser.level,
+      xp: updatedUser.xp,
+      coins: updatedUser.coins,
+      dailyReward,
+      streak
     }
   });
 };

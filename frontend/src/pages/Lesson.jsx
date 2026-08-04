@@ -198,6 +198,14 @@ const Lesson = () => {
               </div>
             )}
 
+            {result.chest && result.chest.coins > 0 && (
+              <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-6 rounded-2xl shadow-lg mb-6 animate-pulse">
+                <div className="text-4xl mb-2">🎁</div>
+                <div className="text-2xl font-bold mb-1">Сундук с монетами!</div>
+                <div className="text-lg">+{result.chest.coins} монет бонусом</div>
+              </div>
+            )}
+
             <div className="flex gap-4">
               <button
                 onClick={() => window.location.reload()}
