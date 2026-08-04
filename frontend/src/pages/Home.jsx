@@ -85,7 +85,7 @@ const Home = () => {
       <Navbar />
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-20 sm:pb-8">
         {showDaily && (
-          <div className="mb-4 sm:mb-6 bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-4 rounded-2xl shadow-lg text-center animate-pulse">
+          <div className="mb-4 sm:mb-6 bg-yellow-400/80 backdrop-blur-md text-white p-4 rounded-2xl shadow-lg text-center animate-pulse border border-white/40">
             <div className="text-3xl mb-1">🎁</div>
             <div className="text-lg font-bold">Ежедневная награда!</div>
             <div className="text-sm">
@@ -99,7 +99,7 @@ const Home = () => {
           <p className="text-sm sm:text-base text-gray-600">Начни с простого и двигайся к сложному!</p>
         </div>
 
-        <div className="flex justify-center gap-3 mb-6 sm:mb-8">
+        <div className="flex flex-wrap justify-center gap-3 mb-6 sm:mb-8">
           <button
             onClick={() => setFilter('all')}
             className={`px-5 py-2 rounded-xl font-semibold transition ${
@@ -167,8 +167,8 @@ const Home = () => {
                   </div>
                 </div>
 
-                <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">{topic.name}</h3>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4">{topic.description}</p>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 line-clamp-1">{topic.name}</h3>
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2">{topic.description}</p>
 
                 {isCompleted && (
                   <div className="flex items-center gap-1 mb-3 sm:mb-4">

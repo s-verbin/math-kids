@@ -156,39 +156,39 @@ const Lesson = () => {
         <Navbar />
         <div className="min-h-screen flex items-center justify-center p-4">
           <div className="card max-w-2xl w-full text-center">
-            <div className="text-8xl mb-6 animate-bounce">{resultMsg.emoji || '🎓'}</div>
+            <div className="text-6xl mb-4 animate-bounce">{resultMsg.emoji || '🎓'}</div>
             
-            <h2 className={`text-4xl font-bold mb-4 ${resultMsg.color}`}>
+            <h2 className={`text-2xl sm:text-3xl font-bold mb-4 ${resultMsg.color}`}>
               {resultMsg.text}
             </h2>
 
-            <div className="grid grid-cols-2 gap-4 my-8">
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl">
-                <div className="text-4xl font-bold text-purple-600">{result.score}/{result.total}</div>
-                <div className="text-gray-600 mt-2">Правильных ответов</div>
+            <div className="grid grid-cols-2 gap-3 my-6">
+              <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40">
+                <div className="text-3xl font-bold text-purple-600">{result.score}/{result.total}</div>
+                <div className="text-gray-600 mt-1 text-sm">Правильных</div>
               </div>
               
-              <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-6 rounded-xl">
-                <div className="text-4xl font-bold text-pink-600">{result.accuracy}%</div>
-                <div className="text-gray-600 mt-2">Точность</div>
+              <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40">
+                <div className="text-3xl font-bold text-pink-600">{result.accuracy}%</div>
+                <div className="text-gray-600 mt-1 text-sm">Точность</div>
               </div>
 
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl">
-                <div className="text-4xl font-bold text-blue-600">+{result.xpGained}</div>
-                <div className="text-gray-600 mt-2">Опыта получено</div>
+              <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40">
+                <div className="text-3xl font-bold text-blue-600">+{result.xpGained}</div>
+                <div className="text-gray-600 mt-1 text-sm">Опыт</div>
               </div>
 
-              <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-xl">
-                <div className="text-4xl font-bold text-yellow-600 flex items-center justify-center gap-2">
-                  <Coins size={32} />
+              <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40">
+                <div className="text-3xl font-bold text-yellow-600 flex items-center justify-center gap-2">
+                  <Coins size={24} />
                   +{result.coinsGained || 0}
                 </div>
-                <div className="text-gray-600 mt-2">Монет заработано</div>
+                <div className="text-gray-600 mt-1 text-sm">Монет</div>
               </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl">
-                <div className="text-4xl font-bold text-green-600">{result.newLevel}</div>
-                <div className="text-gray-600 mt-2">Твой уровень</div>
+              <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40 col-span-2">
+                <div className="text-3xl font-bold text-green-600">{result.newLevel}</div>
+                <div className="text-gray-600 mt-1 text-sm">Уровень</div>
               </div>
             </div>
 
@@ -236,41 +236,41 @@ const Lesson = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen flex items-center justify-center p-3 sm:p-4">
-        <div className="card max-w-2xl w-full">
-          <div className="mb-4 sm:mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-700 truncate pr-2">{topic.name}</h2>
-              <span className="text-sm sm:text-base text-gray-600 font-semibold whitespace-nowrap">
+      <div className="min-h-screen flex flex-col items-center justify-start pt-2 sm:pt-4 p-3 sm:p-4">
+        <div className="card max-w-2xl w-full flex flex-col max-h-[calc(100svh-4rem)] overflow-hidden">
+          <div className="mb-2 sm:mb-3">
+            <div className="flex justify-between items-center mb-1">
+              <h2 className="text-sm sm:text-base font-bold text-gray-700 truncate pr-2">{topic.name}</h2>
+              <span className="text-xs sm:text-sm text-gray-600 font-semibold whitespace-nowrap">
                 {currentIndex + 1} / {problems.length}
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
+            <div className="w-full bg-gray-200/70 rounded-full h-2 sm:h-2.5">
               <div
-                className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 sm:h-3 rounded-full transition-all duration-300"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 sm:h-2.5 rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
           </div>
 
-          <div className="text-center my-8 sm:my-12 pb-32 md:pb-0">
-            <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-800 mb-6 sm:mb-8 px-2">
+          <div className="text-center flex-1 flex flex-col justify-center min-h-0 my-2 sm:my-4 pb-40 md:pb-0">
+            <div className="text-[clamp(1.25rem,5.5vw,2.25rem)] sm:text-[clamp(1.5rem,4.5vw,2.75rem)] md:text-[clamp(1.75rem,3.5vw,3.25rem)] leading-tight font-bold text-gray-800 mb-3 sm:mb-4 px-2 break-words whitespace-normal">
               {currentProblem.question}
             </div>
 
             {isRussian && currentProblem.options ? (
-              <div className="max-w-2xl mx-auto px-2">
-                <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
+              <div className="max-w-2xl mx-auto px-2 w-full">
+                <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
                   {currentProblem.options.map((option) => (
                     <button
                       key={option}
                       onClick={() => handleLetterClick(option)}
                       disabled={feedback !== null}
-                      className={`text-3xl sm:text-4xl md:text-5xl font-bold py-6 sm:py-8 rounded-2xl transition-all touch-manipulation ${
+                      className={`text-2xl sm:text-3xl font-bold min-h-[52px] sm:min-h-[60px] rounded-2xl transition-all touch-manipulation ${
                         userAnswer === option
-                          ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white scale-105'
-                          : 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800 active:scale-95'
-                      } disabled:opacity-50 disabled:cursor-not-allowed shadow-lg`}
+                          ? 'bg-gradient-to-br from-purple-500/90 to-pink-500/90 text-white scale-105 shadow-lg'
+                          : 'bg-white/60 backdrop-blur-md text-gray-800 active:scale-95 border border-white/60 shadow-md'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       {option}
                     </button>
@@ -278,23 +278,23 @@ const Lesson = () => {
                 </div>
 
                 {feedback && (
-                  <div className={`mt-4 sm:mt-6 p-4 sm:p-6 rounded-xl ${feedback.isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
-                    <div className="flex items-center justify-center gap-2 sm:gap-3 text-xl sm:text-2xl font-bold">
+                  <div className={`mt-3 p-3 rounded-2xl ${feedback.isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
+                    <div className="flex items-center justify-center gap-2 text-lg sm:text-xl font-bold">
                       {feedback.isCorrect ? (
                         <>
-                          <Check size={24} className="text-green-600 sm:w-8 sm:h-8" />
+                          <Check size={22} className="text-green-600" />
                           <span className="text-green-600">Правильно!</span>
                         </>
                       ) : (
                         <>
-                          <X size={24} className="text-red-600 sm:w-8 sm:h-8" />
+                          <X size={22} className="text-red-600" />
                           <span className="text-red-600">Неправильно</span>
                         </>
                       )}
                     </div>
                     {feedback && currentProblem && (
-                      <div className="mt-4 text-center">
-                        <div className="text-3xl sm:text-4xl font-bold text-gray-800 tracking-wider">
+                      <div className="mt-2 text-center">
+                        <div className="text-2xl sm:text-3xl font-bold text-gray-800 tracking-wider break-words whitespace-normal">
                           {(() => {
                             const replacement = feedback.correctAnswer === '-' ? '' : feedback.correctAnswer;
                             return currentProblem.question.replace('_', replacement);
@@ -303,8 +303,8 @@ const Lesson = () => {
                       </div>
                     )}
                     {!feedback.isCorrect && (
-                      <div className="mt-2 text-sm sm:text-base text-gray-600">
-                        Правильный ответ: <span className="font-bold text-2xl sm:text-3xl">{feedback.correctAnswer}</span>
+                      <div className="mt-2 text-sm text-gray-600">
+                        Правильный ответ: <span className="font-bold text-xl sm:text-2xl">{feedback.correctAnswer}</span>
                       </div>
                     )}
                   </div>
@@ -317,7 +317,7 @@ const Lesson = () => {
                   inputMode="none"
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
-                  className="input-field text-3xl sm:text-4xl md:hidden"
+                  className="input-field text-2xl sm:text-3xl md:hidden"
                   placeholder="?"
                   readOnly
                   disabled={feedback !== null}
@@ -326,7 +326,7 @@ const Lesson = () => {
                   type="number"
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
-                  className="input-field text-3xl sm:text-4xl hidden md:block"
+                  className="input-field text-2xl sm:text-3xl hidden md:block"
                   placeholder="?"
                   autoFocus
                   required
@@ -334,30 +334,30 @@ const Lesson = () => {
                 />
 
                 {feedback && (
-                  <div className={`mt-4 sm:mt-6 p-4 sm:p-6 rounded-xl ${feedback.isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
-                    <div className="flex items-center justify-center gap-2 sm:gap-3 text-xl sm:text-2xl font-bold">
+                  <div className={`mt-3 p-3 rounded-2xl ${feedback.isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
+                    <div className="flex items-center justify-center gap-2 text-lg sm:text-xl font-bold">
                       {feedback.isCorrect ? (
                         <>
-                          <Check size={24} className="text-green-600 sm:w-8 sm:h-8" />
+                          <Check size={22} className="text-green-600" />
                           <span className="text-green-600">Правильно!</span>
                         </>
                       ) : (
                         <>
-                          <X size={24} className="text-red-600 sm:w-8 sm:h-8" />
+                          <X size={22} className="text-red-600" />
                           <span className="text-red-600">Неправильно</span>
                         </>
                       )}
                     </div>
                     {/* Показываем слово с подставленной буквой */}
                     {isRussian && feedback.isCorrect && currentProblem && (
-                      <div className="mt-4 text-center">
-                        <div className="text-3xl sm:text-4xl font-bold text-gray-800 tracking-wider">
+                      <div className="mt-2 text-center">
+                        <div className="text-2xl sm:text-3xl font-bold text-gray-800 tracking-wider break-words whitespace-normal">
                           {(() => {
                             const parts = currentProblem.question.split('_');
                             return (
                               <>
                                 <span>{parts[0]}</span>
-                                <span className="text-green-600 text-4xl sm:text-5xl inline-block mx-0.5 animate-pulse">
+                                <span className="text-green-600 text-2xl sm:text-3xl inline-block mx-0.5 animate-pulse">
                                   {feedback.correctAnswer}
                                 </span>
                                 <span>{parts[1] || ''}</span>
@@ -369,8 +369,8 @@ const Lesson = () => {
                     )}
 
                     {!feedback.isCorrect && (
-                      <div className="mt-2 text-sm sm:text-base text-gray-600">
-                        Правильный ответ: <span className="font-bold text-lg sm:text-xl">{feedback.correctAnswer}</span>
+                      <div className="mt-2 text-sm text-gray-600">
+                        Правильный ответ: <span className="font-bold text-xl sm:text-2xl">{feedback.correctAnswer}</span>
                       </div>
                     )}
                   </div>
