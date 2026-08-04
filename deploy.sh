@@ -25,16 +25,34 @@ echo "📦 Домен: ${DOMAIN}"
 echo "🧹 Создаём директорию на сервере..."
 ssh "$SSH_HOST" "mkdir -p ${REMOTE_DIR}"
 
+# ==== Копирование кода ====
+echo "📂 Копируем проект на сервер..."
+rsync -avz --delete \
+  --exclude='node_modules' \
+  --exclude='.git' \
+  --exclude='mathkids.db' \
+  --exclude='dist' \
+  --exclude='.env' \
+  --exclude='*.log' \
+  ./ "$SSH_HOST:${REMOTE_DIR}/"
+
+# ==== Останавливаем старые контейнеры, чтобы освободить порты ====
+echo "🛑 Останавливаем старые контейнеры..."
+ssh "$SSH_HOST" "cd ${REMOTE_DIR} && docker compose down 2>/dev/null || true"
+
 # ==== Проверка занятых портов ====
 echo "🔍 Проверяем доступные порты на сервере..."
 USED_PORTS=$(ssh "$SSH_HOST" "ss -tlnp | awk 'NR>1 {for(i=4;i<=NF;i++) print \$i}' | grep -oP ':\K[0-9]+' | sort -u" || true)
 
 echo "📋 Используемые порты: ${USED_PORTS:-'не определены'}"
 
+TAKEN_PORTS=""
+
 find_free_port() {
   local port=$1
   while [ "$port" -lt 65535 ]; do
-    if ! echo "$USED_PORTS" | grep -q "^${port}$"; then
+    if ! echo "$USED_PORTS $TAKEN_PORTS" | grep -q "^${port}$"; then
+      TAKEN_PORTS="$TAKEN_PORTS $port"
       echo "$port"
       return
     fi
@@ -50,28 +68,23 @@ FRONTEND_PORT=$(find_free_port "$FRONTEND_PORT_DEFAULT")
 echo "✅ Backend порт: ${BACKEND_PORT}"
 echo "✅ Frontend порт: ${FRONTEND_PORT}"
 
-# ==== Копирование кода ====
-echo "📂 Копируем проект на сервер..."
-rsync -avz --delete \
-  --exclude='node_modules' \
-  --exclude='.git' \
-  --exclude='mathkids.db' \
-  --exclude='dist' \
-  --exclude='.env' \
-  --exclude='*.log' \
-  ./ "$SSH_HOST:${REMOTE_DIR}/"
-
 # ==== Настройка окружения ====
 echo "⚙️ Создаём .env файл..."
+
+# Сохраняем существующий JWT_SECRET или генерируем новый
+EXISTING_JWT=$(ssh "$SSH_HOST" "grep '^JWT_SECRET=' ${REMOTE_DIR}/.env 2>/dev/null | cut -d= -f2" || true)
+JWT_SECRET=${EXISTING_JWT:-$(openssl rand -hex 32 2>/dev/null || cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 64)}
+
 ssh "$SSH_HOST" "cat > ${REMOTE_DIR}/.env <<EOF
 BACKEND_PORT=${BACKEND_PORT}
 FRONTEND_PORT=${FRONTEND_PORT}
 DOMAIN=${DOMAIN}
+JWT_SECRET=${JWT_SECRET}
 EOF"
 
 # ==== Сборка и запуск Docker ====
 echo "🐳 Собираем и запускаем контейнеры..."
-ssh "$SSH_HOST" "cd ${REMOTE_DIR} && docker compose down 2>/dev/null || true && docker compose up -d --build"
+ssh "$SSH_HOST" "cd ${REMOTE_DIR} && docker compose up -d --build"
 
 # ==== Проверка запуска ====
 echo "⏳ Ожидаем запуск backend..."
