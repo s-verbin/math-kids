@@ -139,7 +139,7 @@ dbWrapper.exec(`
 
   CREATE TABLE IF NOT EXISTS farm_animals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     type TEXT NOT NULL,
     price INTEGER NOT NULL,
     description TEXT,
@@ -148,7 +148,7 @@ dbWrapper.exec(`
 
   CREATE TABLE IF NOT EXISTS farm_items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     category TEXT NOT NULL,
     price INTEGER NOT NULL,
     description TEXT,
