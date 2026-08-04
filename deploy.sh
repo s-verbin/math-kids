@@ -128,13 +128,12 @@ ssh "$SSH_HOST" << REMOTE_SCRIPT
     exit 0
   fi
 
-  if [ -d "/etc/letsencrypt/live/${DOMAIN}" ]; then
-    echo "📝 Сертификаты уже существуют, обновляем..."
-    certbot renew --nginx --quiet
-  else
-    echo "🆕 Выпускаем новый сертификат..."
-    certbot --nginx -d "${DOMAIN}" -d "www.${DOMAIN}" --non-interactive --agree-tos --email "admin@${DOMAIN}" --redirect
-  fi
+  echo "🔒 Обновляем/выпускаем сертификат только для ${DOMAIN}..."
+  certbot certonly --nginx \
+    -d "${DOMAIN}" -d "www.${DOMAIN}" \
+    --non-interactive --agree-tos \
+    --email "admin@${DOMAIN}" \
+    --keep-until-expiring
 
   # Перезагружаем nginx ещё раз
   systemctl reload nginx || nginx -s reload
