@@ -156,29 +156,29 @@ const Poop = ({ data, onClean }) => {
         castShadow
         receiveShadow
         onClick={(e) => { e.stopPropagation(); onClean(); }}
-        position={[0, data.size * 0.15, 0]}
-        scale={[1, 0.5, 1]}
+        position={[0, data.size * 0.18, 0]}
+        scale={[1, 0.55, 1]}
       >
-        <sphereGeometry args={[data.size * 0.22, 12, 12]} />
+        <sphereGeometry args={[data.size * 0.28, 14, 14]} />
         <meshStandardMaterial color='#3E2723' roughness={0.9} metalness={0.05} />
       </mesh>
-      <Html position={[0, data.size * 0.5, 0]} center distanceFactor={10}>
-        <button
-          onClick={onClean}
+      <Html position={[0, data.size * 1.1, 0]} center distanceFactor={10}>
+        <div
           style={{
             background: '#FFF8E7',
             color: '#5D4037',
             border: 'none',
             borderRadius: '12px',
-            padding: '2px 8px',
-            fontSize: '12px',
+            padding: '1px 6px',
+            fontSize: '11px',
             fontFamily: '"Comic Sans MS", cursive, sans-serif',
-            cursor: 'pointer',
+            pointerEvents: 'none',
+            userSelect: 'none',
             boxShadow: '0 1px 4px rgba(0,0,0,0.15)'
           }}
         >
           🧹 +1
-        </button>
+        </div>
       </Html>
     </group>
   );
