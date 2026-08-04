@@ -253,7 +253,7 @@ const Lesson = () => {
             </div>
           </div>
 
-          <div className="text-center flex-1 flex flex-col justify-center min-h-0 my-2 sm:my-4 pb-40 md:pb-0">
+          <div className="text-center flex-1 flex flex-col justify-center min-h-0 my-2 sm:my-4 pb-40 lg:pb-0">
             <div className="text-[clamp(1.25rem,5.5vw,2.25rem)] sm:text-[clamp(1.5rem,4.5vw,2.75rem)] md:text-[clamp(1.75rem,3.5vw,3.25rem)] leading-tight font-bold text-gray-800 mb-3 sm:mb-4 px-2 break-words whitespace-normal">
               {currentProblem.question}
             </div>
@@ -317,7 +317,7 @@ const Lesson = () => {
                   inputMode="none"
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
-                  className="input-field text-2xl sm:text-3xl md:hidden"
+                  className="input-field text-2xl sm:text-3xl lg:hidden"
                   placeholder="?"
                   readOnly
                   disabled={feedback !== null}
@@ -326,7 +326,7 @@ const Lesson = () => {
                   type="number"
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
-                  className="input-field text-2xl sm:text-3xl hidden md:block"
+                  className="input-field text-2xl sm:text-3xl hidden lg:block"
                   placeholder="?"
                   autoFocus
                   required

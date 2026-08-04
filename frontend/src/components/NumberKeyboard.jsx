@@ -4,7 +4,7 @@ const NumberKeyboard = ({ onNumberClick, onDelete, onSubmit, disabled }) => {
   const numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-xl border-t border-white/30 shadow-2xl p-2 sm:p-3 pb-[env(safe-area-inset-bottom)] z-50 md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-xl border-t border-white/30 shadow-2xl p-2 sm:p-3 pb-[env(safe-area-inset-bottom)] z-50 lg:hidden">
       <div className="max-w-md mx-auto">
         <div className="grid grid-cols-3 gap-2 mb-2">
           {numbers.slice(0, 9).map((num) => (
