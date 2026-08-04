@@ -13,7 +13,7 @@ const ANIMAL_CONFIGS = {
     bodyColor: '#ffb6c1',
     darkColor: '#e8a5a5',
     snoutColor: '#ff9999',
-    size: 0.62,
+    size: 0.8,
     bodyScale: [1.05, 0.85, 1.25],
     headSize: 0.38,
     ears: 'pointed',
@@ -26,7 +26,7 @@ const ANIMAL_CONFIGS = {
     bodyColor: '#fff8dc',
     darkColor: '#f0e68c',
     snoutColor: '#ff6b35',
-    size: 0.28,
+    size: 0.36,
     bodyScale: [0.65, 0.85, 0.85],
     headSize: 0.18,
     ears: 'comb',
@@ -40,7 +40,7 @@ const ANIMAL_CONFIGS = {
     bodyColor: '#f5f5f5',
     darkColor: '#333333',
     snoutColor: '#ff9999',
-    size: 1.0,
+    size: 1.3,
     bodyScale: [1.4, 1.1, 1.8],
     headSize: 0.55,
     ears: 'flat',
@@ -55,7 +55,7 @@ const ANIMAL_CONFIGS = {
     bodyColor: '#8b4513',
     darkColor: '#5c2e0c',
     snoutColor: '#3d3d3d',
-    size: 0.95,
+    size: 1.23,
     bodyScale: [1.15, 1.2, 1.7],
     headSize: 0.5,
     ears: 'long',
@@ -68,7 +68,7 @@ const ANIMAL_CONFIGS = {
     bodyColor: '#fffaf0',
     darkColor: '#e6e0d4',
     snoutColor: '#333333',
-    size: 0.58,
+    size: 0.75,
     bodyScale: [1.25, 1.0, 1.25],
     headSize: 0.32,
     ears: 'flat',
@@ -83,7 +83,7 @@ const ANIMAL_CONFIGS = {
     bodyColor: '#fff8dc',
     darkColor: '#90ee90',
     snoutColor: '#ff6b35',
-    size: 0.25,
+    size: 0.32,
     bodyScale: [0.6, 0.7, 0.9],
     headSize: 0.16,
     ears: 'none',
@@ -97,7 +97,7 @@ const ANIMAL_CONFIGS = {
     bodyColor: '#d2691e',
     darkColor: '#8b4513',
     snoutColor: '#333333',
-    size: 0.55,
+    size: 0.71,
     bodyScale: [1.0, 0.9, 1.3],
     headSize: 0.35,
     ears: 'floppy',
@@ -110,7 +110,7 @@ const ANIMAL_CONFIGS = {
     bodyColor: '#ff8c00',
     darkColor: '#cc7000',
     snoutColor: '#ff9999',
-    size: 0.38,
+    size: 0.49,
     bodyScale: [0.85, 0.75, 1.15],
     headSize: 0.28,
     ears: 'pointed',
@@ -138,7 +138,7 @@ const ANIMAL_CONFIGS = {
     bodyColor: '#a9a9a9',
     darkColor: '#696969',
     snoutColor: '#4a4a4a',
-    size: 0.72,
+    size: 0.94,
     bodyScale: [1.05, 1.1, 1.45],
     headSize: 0.4,
     ears: 'long',
@@ -148,8 +148,9 @@ const ANIMAL_CONFIGS = {
   }
 };
 
-const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryData = null, plantPositions = [], eatenRef, onClick, bounds = FARM_BOUNDS }) => {
+const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryData = null, plantPositions = [], eatenRef, obstacles = [], onClick, bounds = FARM_BOUNDS }) => {
   const groupRef = useRef();
+  const bodyRef = useRef();
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
   const [isLying, setIsLying] = useState(false);
@@ -162,6 +163,7 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
   const isLyingRef = useRef(false);
   const lieTimeRef = useRef(0);
   const baseY = position[1];
+  const MIN_OBSTACLE_DIST = 1.8;
 
   const type = animalData?.type || 'pig';
   const config = ANIMAL_CONFIGS[type] || ANIMAL_CONFIGS.pig;
@@ -171,9 +173,22 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
   const lerp = (a, b, t) => a + (b - a) * t;
 
   const getNewTarget = () => {
-    const x = (Math.random() - 0.5) * 2 * bounds;
-    const z = (Math.random() - 0.5) * 2 * bounds;
-    return new THREE.Vector3(x, position[1], z);
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const x = (Math.random() - 0.5) * 2 * bounds;
+      const z = (Math.random() - 0.5) * 2 * bounds;
+      const p = new THREE.Vector3(x, position[1], z);
+      let safe = true;
+      for (const o of obstacles) {
+        const dx = p.x - o.x;
+        const dz = p.z - o.z;
+        if (dx * dx + dz * dz < MIN_OBSTACLE_DIST * MIN_OBSTACLE_DIST) {
+          safe = false;
+          break;
+        }
+      }
+      if (safe) return p;
+    }
+    return new THREE.Vector3(position[0], position[1], position[2]);
   };
 
   useFrame((state, delta) => {
@@ -190,12 +205,16 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       setIsLying(isLyingRef.current);
     }
 
+    // Дыхание
+    const breath = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.03;
+
     if (isLyingRef.current) {
       // Животное отдыхает
       lieTimeRef.current -= delta;
       if (lieTimeRef.current <= 0) {
         isLyingRef.current = false;
       }
+      if (bodyRef.current) bodyRef.current.scale.set(config.bodyScale[0], config.bodyScale[1], config.bodyScale[2]);
       groupRef.current.position.y = lerp(groupRef.current.position.y, baseY - config.size * 0.35, 0.05);
       groupRef.current.rotation.x = lerp(groupRef.current.rotation.x, -Math.PI / 6, 0.05);
       groupRef.current.rotation.y = lerp(groupRef.current.rotation.y, 0, 0.05);
@@ -222,9 +241,25 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
           if (leg) leg.rotation.x = 0;
         });
       } else {
-        posRef.current.add(direction.multiplyScalar(step));
-        const angle = Math.atan2(direction.x, direction.z);
-        groupRef.current.rotation.y = angle;
+        // Проверка столкновений со зданиями
+        const nextPos = posRef.current.clone().add(direction.clone().multiplyScalar(step));
+        let blocked = false;
+        for (const o of obstacles) {
+          const dx = nextPos.x - o.x;
+          const dz = nextPos.z - o.z;
+          if (dx * dx + dz * dz < 0.8) {
+            blocked = true;
+            break;
+          }
+        }
+        if (blocked) {
+          isMovingRef.current = false;
+          waitTimeRef.current = 0.3;
+        } else {
+          posRef.current.copy(nextPos);
+          const angle = Math.atan2(direction.x, direction.z);
+          groupRef.current.rotation.y = angle;
+        }
       }
 
       // Животное ест растения, если проходит рядом
@@ -247,6 +282,7 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       // Анимация ходьбы
       groupRef.current.position.y = posRef.current.y + Math.abs(Math.sin(walkTime)) * 0.08;
       groupRef.current.rotation.x = Math.sin(walkTime) * 0.05;
+      if (bodyRef.current) bodyRef.current.scale.set(config.bodyScale[0], config.bodyScale[1], config.bodyScale[2]);
 
       const legCount = config.legs === 2 ? 2 : 4;
       for (let i = 0; i < legCount; i++) {
@@ -269,13 +305,14 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
           isMovingRef.current = true;
         }
       }
-      // Сбрасываем ноги и лёгкое покачивание
+      // Сбрасываем ноги, покачивание и дышим
       legRefs.current.forEach(leg => {
         if (leg) leg.rotation.x = 0;
       });
       groupRef.current.position.y = lerp(groupRef.current.position.y, posRef.current.y + Math.sin(state.clock.elapsedTime * 2) * 0.05, 0.1);
       groupRef.current.rotation.x = lerp(groupRef.current.rotation.x, 0, 0.1);
       groupRef.current.rotation.y = posRef.current.x * 0.02 + Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
+      if (bodyRef.current) bodyRef.current.scale.set(config.bodyScale[0] * breath, config.bodyScale[1] * breath, config.bodyScale[2] * breath);
     }
   });
 
@@ -518,8 +555,8 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       onClick={handleClick}
     >
       {/* Тело */}
-      <mesh castShadow position={[0, config.size * 1.1, 0]}>
-        <sphereGeometry args={[config.size, 16, 16]} scale={config.bodyScale} />
+      <mesh ref={bodyRef} castShadow position={[0, config.size * 1.1, 0]} scale={config.bodyScale}>
+        <sphereGeometry args={[config.size, 16, 16]} />
         <meshStandardMaterial
           color={color}
           roughness={0.7}
@@ -578,27 +615,36 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       {animalData?.name && (
         <Html position={[0, headY + 0.5, 0]} center distanceFactor={10}>
           <div style={{
-            background: 'rgba(0, 0, 0, 0.7)',
-            color: 'white',
-            padding: '2px 8px',
-            borderRadius: '12px',
+            background: '#FFF8E7',
+            color: '#5D4037',
+            padding: '3px 10px',
+            borderRadius: '14px',
             fontSize: `${labelFontSize}px`,
             fontWeight: 'bold',
+            fontFamily: '"Comic Sans MS", "Fredoka", cursive, sans-serif',
             whiteSpace: 'nowrap',
             pointerEvents: 'none',
-            userSelect: 'none'
+            userSelect: 'none',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+            border: '1px solid rgba(255,255,255,0.6)'
           }}>
-            {animalData.name}
+            ⭐ {animalData.name}
           </div>
         </Html>
       )}
 
-      {/* Индикатор состояния */}
+      {/* Индикатор нужд / эмоций */}
       {(animalData?.isHungry || animalData?.needsPetting) && (
         <Html position={[0, headY + 0.9, 0]} center distanceFactor={10}>
-          <div style={{ fontSize: `${Math.max(16, Math.round(24 * config.size))}px` }}>
-            {animalData.isHungry ? '😢' : ''}
-            {animalData.needsPetting ? '😔' : ''}
+          <div style={{
+            background: 'rgba(255,255,255,0.95)',
+            borderRadius: '50%',
+            padding: '2px 6px',
+            fontSize: `${Math.max(14, Math.round(22 * config.size))}px`,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.15)'
+          }}>
+            {animalData.isHungry ? '🍎' : ''}
+            {animalData.needsPetting ? '❤️' : ''}
           </div>
         </Html>
       )}

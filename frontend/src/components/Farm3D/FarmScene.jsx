@@ -2,11 +2,41 @@ import { useState, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, Html } from '@react-three/drei';
 import { Suspense } from 'react';
+import * as THREE from 'three';
 import Ground from './Ground';
 import Background from './Background';
 import ProceduralAnimal from './ProceduralAnimal';
 import FarmBuilding from './FarmBuilding';
 import Draggable from './Draggable';
+
+const Fence = ({ bounds }) => {
+  const half = bounds + 0.3;
+  const rails = [
+    [-half, -half, half, -half],
+    [half, -half, half, half],
+    [-half, half, half, half],
+    [-half, -half, -half, half]
+  ];
+  return (
+    <group>
+      {rails.map((r, i) => (
+        <mesh key={i} castShadow position={[(r[0] + r[2]) / 2, 0.45, (r[1] + r[3]) / 2]}>
+          <boxGeometry args={[Math.max(0.1, Math.abs(r[2] - r[0])), 0.06, Math.max(0.1, Math.abs(r[3] - r[1]))]} />
+          <meshStandardMaterial color='#A0522D' roughness={0.9} />
+        </mesh>
+      ))}
+    </group>
+  );
+};
+
+const Path = ({ bounds }) => {
+  return (
+    <mesh position={[0, 0.01, bounds * 0.6]} rotation={[-Math.PI / 2, 0, 0]}>
+      <planeGeometry args={[1.2, bounds]} />
+      <meshStandardMaterial color='#D2B48C' roughness={1} />
+    </mesh>
+  );
+};
 
 const Plants = ({ positions, eatenRef }) => {
   const refs = useRef([]);
@@ -57,6 +87,29 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal }) => {
   const buildingItems = inventory.filter(item => item.category === 'building');
   const decorationItems = inventory.filter(item => item.category === 'decoration');
   const accessoryItems = inventory.filter(item => item.category === 'accessory');
+
+  const obstacles = useMemo(() => {
+    const positions = [
+      [-3, 0, -4],
+      [3, 0, -4],
+      [-3, 0, 4],
+      [3, 0, 4],
+      [-4, 0, 0],
+      [4, 0, 0]
+    ];
+    const list = [];
+    buildingItems.forEach((item, i) => {
+      const basePos = positions[i % positions.length];
+      const finalPos = draggedPositions[item.id] || basePos;
+      list.push(new THREE.Vector3(finalPos[0], finalPos[1], finalPos[2]));
+    });
+    decorationItems.forEach((item, i) => {
+      const basePos = positions[(i + buildingItems.length) % positions.length];
+      const finalPos = draggedPositions[item.id] || [basePos[0] + i * 0.3, 0, basePos[2] + i * 0.3];
+      list.push(new THREE.Vector3(finalPos[0], finalPos[1], finalPos[2]));
+    });
+    return list;
+  }, [buildingItems, decorationItems, draggedPositions]);
 
   const plantPositions = useMemo(() => {
     return Array.from({ length: 60 }, (_, i) => {
@@ -114,6 +167,10 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal }) => {
 
           {/* Земля - расширяется с покупкой участков */}
           <Ground landCount={landCount} />
+
+          {/* Забор и тропинки */}
+          <Fence bounds={animalBounds} />
+          <Path bounds={animalBounds} />
 
           {/* Растения */}
           <Plants positions={plantPositions} eatenRef={eatenRef} />
@@ -181,7 +238,7 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal }) => {
           {animals.map((animal, index) => {
             const count = animals.length;
             const angle = (index / (count || 1)) * Math.PI * 2;
-            const radius = 2.5;
+            const radius = 3.5;
             const x = Math.cos(angle) * radius;
             const z = Math.sin(angle) * radius;
             const accessoryData = accessoryItems[index % Math.max(accessoryItems.length, 1)] || null;
@@ -194,6 +251,7 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal }) => {
                 accessoryData={accessoryData}
                 plantPositions={plantPositions}
                 eatenRef={eatenRef}
+                obstacles={obstacles}
                 onClick={onPetAnimal ? (data) => onPetAnimal(data.id) : undefined}
                 bounds={animalBounds}
               />
