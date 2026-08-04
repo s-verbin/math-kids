@@ -206,7 +206,13 @@ const topics = [
   { name: 'Безударные гласные', description: 'Вставь пропущенную букву', difficulty: 2, category: 'russian', operations: 'vowels', min_value: 0, max_value: 0, order_index: 17 },
   { name: 'Парные согласные', description: 'Выбери правильную согласную', difficulty: 3, category: 'russian', operations: 'consonants', min_value: 0, max_value: 0, order_index: 18 },
   { name: 'Непроизносимые согласные', description: 'Найди пропущенную букву', difficulty: 4, category: 'russian', operations: 'silent_consonants', min_value: 0, max_value: 0, order_index: 19 },
-  { name: 'Словарные слова', description: 'Правильно напиши словарные слова русского языка', difficulty: 4, category: 'russian', operations: 'dictionary_words', min_value: 0, max_value: 0, order_index: 20 }
+  { name: 'Словарные слова', description: 'Правильно напиши словарные слова русского языка', difficulty: 4, category: 'russian', operations: 'dictionary_words', min_value: 0, max_value: 0, order_index: 20 },
+  { name: 'Считаем фрукты', description: 'Складывай яблоки, груши и другие фрукты', difficulty: 1, category: 'basics', operations: 'fruits_add', min_value: 0, max_value: 0, order_index: 21 },
+  { name: 'Лапы на ферме', description: 'Посчитай лапы у животных', difficulty: 1, category: 'basics', operations: 'farm_legs', min_value: 0, max_value: 0, order_index: 22 },
+  { name: 'Больше или меньше', description: 'Сравни количество и найди разницу', difficulty: 1, category: 'basics', operations: 'compare_more', min_value: 0, max_value: 0, order_index: 23 },
+  { name: 'Делим поровну', description: 'Раздели предметы между друзьями', difficulty: 1, category: 'basics', operations: 'share_equal', min_value: 0, max_value: 0, order_index: 24 },
+  { name: 'Монетки', description: 'Считай рубли и копейки', difficulty: 1, category: 'basics', operations: 'coin_change', min_value: 0, max_value: 0, order_index: 25 },
+  { name: 'Пропущенное число', description: 'Найди пропущенное число в ряду', difficulty: 1, category: 'basics', operations: 'number_missing', min_value: 0, max_value: 0, order_index: 26 }
 ];
 
 const insertTopic = dbWrapper.prepare(`

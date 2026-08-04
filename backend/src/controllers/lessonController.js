@@ -292,6 +292,92 @@ const generateProblem = (topic) => {
     };
   }
 
+  if (operations === 'fruits_add') {
+    const fruits = [
+      { emoji: '🍎', name: 'яблок' },
+      { emoji: '🍐', name: 'груш' },
+      { emoji: '🍊', name: 'апельсинов' },
+      { emoji: '🍇', name: 'виноградин' },
+      { emoji: '🍌', name: 'бананов' }
+    ];
+    const fruit1 = fruits[Math.floor(Math.random() * fruits.length)];
+    const fruit2 = fruits[Math.floor(Math.random() * fruits.length)];
+    const a = Math.floor(Math.random() * 5) + 1;
+    const b = Math.floor(Math.random() * 5) + 1;
+    return {
+      question: `На столе ${a} ${fruit1.emoji} ${fruit1.name} и ${b} ${fruit2.emoji} ${fruit2.name}. Сколько всего фруктов?`,
+      answer: a + b
+    };
+  }
+
+  if (operations === 'farm_legs') {
+    const animals = [
+      { name: 'куриц', emoji: '🐔', legs: 2 },
+      { name: 'коров', emoji: '🐄', legs: 4 },
+      { name: 'свиней', emoji: '🐷', legs: 4 },
+      { name: 'собак', emoji: '🐕', legs: 4 },
+      { name: 'уток', emoji: '🦆', legs: 2 }
+    ];
+    const animal1 = animals[Math.floor(Math.random() * animals.length)];
+    const animal2 = animals[Math.floor(Math.random() * animals.length)];
+    const a = Math.floor(Math.random() * 5) + 1;
+    const b = Math.floor(Math.random() * 4) + 1;
+    return {
+      question: `В загоне ${a} ${animal1.emoji} ${animal1.name} и ${b} ${animal2.emoji} ${animal2.name}. Сколько всего лап?`,
+      answer: a * animal1.legs + b * animal2.legs
+    };
+  }
+
+  if (operations === 'compare_more') {
+    const items = ['конфет', 'машинок', 'игрушек', 'карандашей', 'мячей'];
+    const item = items[Math.floor(Math.random() * items.length)];
+    const a = Math.floor(Math.random() * 10) + 1;
+    const b = Math.floor(Math.random() * 10) + 1;
+    const [more, less] = a > b ? [a, b] : [b, a];
+    return {
+      question: `У Маши ${more} ${item}, у Коли ${less}. На сколько больше у Маши?`,
+      answer: more - less
+    };
+  }
+
+  if (operations === 'share_equal') {
+    const items = ['печенек', 'конфет', 'яблок', 'игрушек', 'мячей'];
+    const friends = Math.floor(Math.random() * 4) + 2;
+    const portion = Math.floor(Math.random() * 5) + 1;
+    const total = friends * portion;
+    const item = items[Math.floor(Math.random() * items.length)];
+    return {
+      question: `${total} ${item} разделили поровну между ${friends} друзьями. Сколько досталось каждому?`,
+      answer: portion
+    };
+  }
+
+  if (operations === 'coin_change') {
+    const price = Math.floor(Math.random() * 20) + 1;
+    const money = Math.floor(Math.random() * 20) + price + 1;
+    const change = money - price;
+    return {
+      question: `Мороженое стоит ${price}₽. У тебя ${money}₽. Сколько сдачи?`,
+      answer: change
+    };
+  }
+
+  if (operations === 'number_missing') {
+    const start = Math.floor(Math.random() * 10) + 1;
+    const step = Math.floor(Math.random() * 2) + 1;
+    const missingIndex = Math.floor(Math.random() * 4) + 1;
+    const sequence = [];
+    for (let i = 0; i < 5; i++) {
+      sequence.push(start + i * step);
+    }
+    const answer = sequence[missingIndex];
+    sequence[missingIndex] = '?';
+    return {
+      question: `Найди пропущенное число: ${sequence.join(', ')}`,
+      answer: answer
+    };
+  }
+
   return { question: '1 + 1', answer: 2 };
 };
 

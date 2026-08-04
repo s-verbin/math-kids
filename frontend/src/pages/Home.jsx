@@ -33,7 +33,8 @@ const Home = () => {
       division: '➗',
       unknown: '❓',
       mixed: '🎯',
-      russian: '📝'
+      russian: '📝',
+      basics: '🍎'
     };
     return icons[category] || '📚';
   };
@@ -107,13 +108,24 @@ const Home = () => {
           >
             📝 Русский
           </button>
+          <button
+            onClick={() => setFilter('basics')}
+            className={`px-5 py-2 rounded-xl font-semibold transition ${
+              filter === 'basics'
+                ? 'bg-orange-600 text-white shadow-lg'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+            }`}
+          >
+            🍎 Основы
+          </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
           {topics
             .filter((topic) => {
-              if (filter === 'math') return topic.category !== 'russian';
+              if (filter === 'math') return topic.category !== 'russian' && topic.category !== 'basics';
               if (filter === 'russian') return topic.category === 'russian';
+              if (filter === 'basics') return topic.category === 'basics';
               return true;
             })
             .map((topic) => {
