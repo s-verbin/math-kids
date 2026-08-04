@@ -5,7 +5,7 @@ import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const dbPath = join(__dirname, '../../mathkids.db');
+const dbPath = process.env.DB_PATH || join(__dirname, '../../mathkids.db');
 
 const SQL = await initSqlJs();
 let db;
