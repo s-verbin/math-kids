@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { userAPI, lessonsAPI } from '../services/api';
-import { Trophy, Target, TrendingUp, Award, Coins } from 'lucide-react';
+import { Trophy, Target, TrendingUp, Award, Coins, Clock } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 
@@ -68,9 +68,15 @@ const Profile = () => {
     );
   }
 
-  const { user, stats, recentLessons, dailyStats } = profile;
+  const { user, stats, records, recentLessons, dailyStats } = profile;
   const xpToNextLevel = (user.level * 100) - user.xp;
   const xpProgress = (user.xp % 100);
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
 
   const unlockedAchievements = achievements.filter(a => a.unlocked);
   const lockedAchievements = achievements.filter(a => !a.unlocked);
@@ -132,6 +138,35 @@ const Profile = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="card mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">🏅 Личные рекорды</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-3 sm:p-4 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <Target className="text-pink-600" size={18} />
+                  <span className="text-xs sm:text-sm text-gray-600 font-semibold">Лучший счёт</span>
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold text-pink-600">{records.bestScore}/10</div>
+              </div>
+
+              <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-3 sm:p-4 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <Award className="text-yellow-600" size={18} />
+                  <span className="text-xs sm:text-sm text-gray-600 font-semibold">Идеальных уроков</span>
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold text-yellow-600">{records.perfectLessons}</div>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-3 sm:p-4 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <Clock className="text-blue-600" size={18} />
+                  <span className="text-xs sm:text-sm text-gray-600 font-semibold">Самый быстрый</span>
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold text-blue-600">{formatTime(records.fastestTime)}</div>
               </div>
             </div>
           </div>

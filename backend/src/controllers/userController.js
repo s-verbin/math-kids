@@ -47,6 +47,15 @@ export const getProfile = (req, res) => {
     LIMIT 7
   `).all(req.userId);
 
+  const records = db.prepare(`
+    SELECT 
+      COALESCE(MAX(score), 0) as best_score,
+      COALESCE(SUM(CASE WHEN score = total_questions THEN 1 ELSE 0 END), 0) as perfect_lessons,
+      COALESCE(MIN(CASE WHEN score = total_questions THEN time_spent END), 0) as fastest_time
+    FROM lessons
+    WHERE user_id = ?
+  `).get(req.userId);
+
   res.json({
     user: {
       id: user.id,
@@ -67,6 +76,11 @@ export const getProfile = (req, res) => {
       totalCorrect: stats.total_correct || 0,
       totalQuestions: stats.total_questions || 0,
       avgAccuracy: stats.avg_accuracy || 0
+    },
+    records: {
+      bestScore: records.best_score || 0,
+      perfectLessons: records.perfect_lessons || 0,
+      fastestTime: records.fastest_time || 0
     },
     dailyStats
   });
