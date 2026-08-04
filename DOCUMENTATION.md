@@ -14,11 +14,16 @@
 
 ## Обзор проекта
 
-**Счетный двор** - образовательное веб-приложение для обучения математике и русскому языку учеников начальных классов.
+**Счетный двор** - образовательное веб-приложение для обучения математике и русскому языку учеников начальных классов с игровой механикой фермы.
 
 ### Основные возможности:
 - 🧮 **16 математических тем** (сложение, вычитание, умножение, деление, сложные уравнения)
 - 📝 **3 темы по русскому языку** (безударные гласные, парные согласные, непроизносимые согласные)
+- 🪙 **Система монет** - зарабатывай монеты за правильные ответы
+- 🚜 **3D Ферма** - покупай и ухаживай за животными из "Скотного двора"
+- 🐷 **10 животных** - свинья, лошадь, корова, курица, овца и другие
+- 🏠 **18 предметов** - постройки, декорации, аксессуары для фермы
+- 🎨 **Процедурная 3D графика** - животные построены из примитивов без текстур
 - 🏆 **20 достижений** с системой прогресса
 - 📊 **Система уровней и опыта (XP)**
 - 🎯 **Таблица лидеров**
@@ -36,18 +41,23 @@ frontend/
 │   ├── components/          # Переиспользуемые компоненты
 │   │   ├── Navbar.jsx       # Навигационная панель
 │   │   ├── NumberKeyboard.jsx  # Кастомная клавиатура для мобильных
-│   │   └── ProtectedRoute.jsx  # Защита маршрутов
+│   │   ├── ProtectedRoute.jsx  # Защита маршрутов
+│   │   └── Farm3D/          # 3D компоненты фермы
+│   │       ├── FarmScene.jsx    # Основная 3D сцена
+│   │       ├── Ground.jsx       # Процедурная земля
+│   │       └── ProceduralPig.jsx # Процедурная свинья
 │   ├── pages/               # Страницы приложения
 │   │   ├── Home.jsx         # Главная страница с темами
 │   │   ├── Lesson.jsx       # Страница урока
 │   │   ├── Profile.jsx      # Профиль пользователя
+│   │   ├── Farm.jsx         # Страница фермы (2D/3D)
 │   │   ├── Leaderboard.jsx  # Таблица лидеров
 │   │   ├── Login.jsx        # Вход
 │   │   └── Register.jsx     # Регистрация
 │   ├── context/
 │   │   └── AuthContext.jsx  # Контекст авторизации
 │   ├── services/
-│   │   └── api.js           # API клиент (Axios)
+│   │   └── api.js           # API клиент (Axios + Farm API)
 │   └── index.css            # Глобальные стили (TailwindCSS)
 ```
 
@@ -58,7 +68,9 @@ backend/
 │   ├── controllers/         # Бизнес-логика
 │   │   ├── authController.js    # Регистрация/вход
 │   │   ├── userController.js    # Профиль пользователя
-│   │   └── lessonController.js  # Генерация и проверка заданий
+│   │   ├── lessonController.js  # Генерация и проверка заданий
+│   │   ├── topicController.js   # Управление темами
+│   │   └── farmController.js    # Логика фермы (покупка, кормление)
 │   ├── middleware/
 │   │   └── auth.js          # JWT авторизация
 │   ├── models/
@@ -67,7 +79,8 @@ backend/
 │   │   ├── auth.js          # Маршруты авторизации
 │   │   ├── user.js          # Маршруты пользователя
 │   │   ├── topics.js        # Маршруты тем
-│   │   └── lessons.js       # Маршруты уроков
+│   │   ├── lessons.js       # Маршруты уроков
+│   │   └── farm.js          # Маршруты фермы
 │   └── server.js            # Точка входа
 └── mathkids.db              # SQLite база данных
 ```
@@ -82,6 +95,9 @@ backend/
 - **Axios** - HTTP клиент
 - **TailwindCSS** - CSS фреймворк
 - **Lucide React** - Иконки
+- **Three.js** - 3D графика
+- **@react-three/fiber** - React рендерер для Three.js
+- **@react-three/drei** - Хелперы для R3F
 - **Vite** - Сборщик
 
 ### Backend
@@ -106,6 +122,7 @@ CREATE TABLE users (
   avatar TEXT DEFAULT '😊',
   level INTEGER DEFAULT 1,
   xp INTEGER DEFAULT 0,
+  coins INTEGER DEFAULT 0,          -- Монеты для фермы
   total_problems_solved INTEGER DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -171,6 +188,62 @@ CREATE TABLE daily_stats (
   problems_solved INTEGER DEFAULT 0,
   correct_answers INTEGER DEFAULT 0,
   UNIQUE(user_id, date)
+);
+```
+
+### Таблица `farm_animals`
+```sql
+CREATE TABLE farm_animals (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE,        -- Название животного
+  type TEXT NOT NULL,                -- pig, horse, cow, etc.
+  price INTEGER NOT NULL,            -- Цена в монетах
+  description TEXT,
+  model_data TEXT                    -- JSON с параметрами 3D модели
+);
+```
+
+### Таблица `farm_items`
+```sql
+CREATE TABLE farm_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE,        -- Название предмета
+  category TEXT NOT NULL,            -- building, decoration, accessory
+  price INTEGER NOT NULL,            -- Цена в монетах
+  description TEXT,
+  model_data TEXT                    -- JSON с параметрами 3D модели
+);
+```
+
+### Таблица `user_animals`
+```sql
+CREATE TABLE user_animals (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  animal_id INTEGER NOT NULL,
+  name TEXT,                         -- Кличка животного
+  hunger INTEGER DEFAULT 100,        -- 0-100
+  happiness INTEGER DEFAULT 100,     -- 0-100
+  last_fed DATETIME DEFAULT CURRENT_TIMESTAMP,
+  last_petted DATETIME DEFAULT CURRENT_TIMESTAMP,
+  purchased_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (animal_id) REFERENCES farm_animals(id)
+);
+```
+
+### Таблица `user_inventory`
+```sql
+CREATE TABLE user_inventory (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  item_id INTEGER NOT NULL,
+  quantity INTEGER DEFAULT 1,
+  equipped_on_animal_id INTEGER,     -- NULL если не надето
+  purchased_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (item_id) REFERENCES farm_items(id),
+  FOREIGN KEY (equipped_on_animal_id) REFERENCES user_animals(id)
 );
 ```
 
@@ -306,6 +379,60 @@ const checkAndUnlockAchievements = (userId, data) => {
 
 ---
 
+## Как работает ферма
+
+### Система монет
+- **10 монет** за каждый правильный ответ в любом уроке
+- Монеты отображаются в профиле и после урока
+- Используются для покупки животных и предметов
+
+### Животные (10 шт)
+| Животное | Цена | Тип |
+|----------|------|-----|
+| Курица | 50 | chicken |
+| Утка | 80 | duck |
+| Свинья | 100 | pig |
+| Кот | 120 | cat |
+| Собака | 150 | dog |
+| Коза | 180 | goat |
+| Овца | 200 | sheep |
+| Осёл | 250 | donkey |
+| Лошадь | 300 | horse |
+| Корова | 500 | cow |
+
+### Предметы магазина (18 шт)
+**Постройки:** Поилка (80), Кормушка (100), Забор (150), Колодец (200), Сарай (300), Мельница (600)
+
+**Декор:** Скамейка (70), Фонарь (90), Клумба (100), Пугало (110), Стог сена (120)
+
+**Аксессуары:** Бантик (30), Колокольчик (40), Венок (45), Шляпа (50), Ошейник (60), Седло (150)
+
+### Геймплей
+1. **Покупка:** Выбери животное в магазине → введи кличку → потрать монеты
+2. **Кормление:** Раз в сутки животное голодает → кнопка "Покормить"
+3. **Глажка:** Раз в сутки животное грустнеет → кнопка "Погладить"
+4. **Индикаторы:** Голод и настроение уменьшаются на 4% в час
+
+### 3D Визуализация
+- **Процедурная графика:** Животные построены из примитивов (сферы, цилиндры, конусы)
+- **Без текстур:** Только процедурные материалы и цвета
+- **Анимации:** Idle (покачивание), клик (сжатие), hover (подсветка)
+- **Переключение:** Кнопка "2D Список" / "3D Вид"
+- **Производительность:** ~60 FPS на современных устройствах
+
+### API Endpoints
+```
+GET  /api/farm/shop       - Список животных и предметов
+GET  /api/farm/my-farm    - Моя ферма (животные + инвентарь + монеты)
+POST /api/farm/buy-animal - Купить животное
+POST /api/farm/buy-item   - Купить предмет
+POST /api/farm/feed       - Покормить животное
+POST /api/farm/pet        - Погладить животное
+POST /api/farm/equip      - Надеть аксессуар
+```
+
+---
+
 ## Проблемные места
 
 ### 1. ⚠️ localStorage и токены
@@ -408,6 +535,36 @@ const isCorrect = isRussian
 
 **Файлы:**
 - `backend/src/controllers/lessonController.js:177-241`
+
+#### 5. Больше 3D животных
+**Что:** Добавить процедурные модели для всех 10 животных.
+
+**Текущее состояние:** Реализована только свинья
+
+**Файлы:**
+- `frontend/src/components/Farm3D/ProceduralHorse.jsx` (создать)
+- `frontend/src/components/Farm3D/ProceduralCow.jsx` (создать)
+- `frontend/src/components/Farm3D/ProceduralChicken.jsx` (создать)
+
+#### 6. Fur Shader (по ТЗ)
+**Что:** Shell-rendering для реалистичной шерсти животных.
+
+**Технологии:**
+- Custom ShaderMaterial
+- Noise-based alpha cutting
+- Multiple shell layers
+
+**Файлы:**
+- `frontend/src/components/Farm3D/shaders/FurMaterial.js` (создать)
+
+#### 7. Взаимодействие с фермой в 3D
+**Что:** Кормление и глажка прямо в 3D сцене.
+
+**Функции:**
+- Клик по животному → меню действий
+- Анимация кормления (частицы еды)
+- Анимация глажки (сердечки)
+- Звуки животных
 
 ### 🎯 Среднесрочные улучшения (1-2 месяца)
 
