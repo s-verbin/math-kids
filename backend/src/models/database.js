@@ -96,6 +96,8 @@ dbWrapper.exec(`
     order_index INTEGER NOT NULL
   );
 
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_topics_name ON topics(name);
+
   CREATE TABLE IF NOT EXISTS lessons (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
@@ -116,6 +118,8 @@ dbWrapper.exec(`
     condition_type TEXT NOT NULL,
     condition_value INTEGER
   );
+
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_achievements_name ON achievements(name);
 
   CREATE TABLE IF NOT EXISTS user_achievements (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -201,7 +205,8 @@ const topics = [
   { name: 'Сложные уравнения', description: 'Найди неизвестное в сложных примерах', difficulty: 7, category: 'unknown', operations: 'complex_unknown', min_value: 1, max_value: 30, order_index: 16 },
   { name: 'Безударные гласные', description: 'Вставь пропущенную букву', difficulty: 2, category: 'russian', operations: 'vowels', min_value: 0, max_value: 0, order_index: 17 },
   { name: 'Парные согласные', description: 'Выбери правильную согласную', difficulty: 3, category: 'russian', operations: 'consonants', min_value: 0, max_value: 0, order_index: 18 },
-  { name: 'Непроизносимые согласные', description: 'Найди пропущенную букву', difficulty: 4, category: 'russian', operations: 'silent_consonants', min_value: 0, max_value: 0, order_index: 19 }
+  { name: 'Непроизносимые согласные', description: 'Найди пропущенную букву', difficulty: 4, category: 'russian', operations: 'silent_consonants', min_value: 0, max_value: 0, order_index: 19 },
+  { name: 'Словарные слова', description: 'Правильно напиши словарные слова русского языка', difficulty: 4, category: 'russian', operations: 'dictionary_words', min_value: 0, max_value: 0, order_index: 20 }
 ];
 
 const insertTopic = dbWrapper.prepare(`
@@ -209,21 +214,18 @@ const insertTopic = dbWrapper.prepare(`
   VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `);
 
-const existingTopics = dbWrapper.prepare('SELECT COUNT(*) as count FROM topics').get();
-if ((existingTopics?.count || 0) === 0) {
-  topics.forEach(topic => {
-    insertTopic.run(
-      topic.name,
-      topic.description,
-      topic.difficulty,
-      topic.category,
-      topic.min_value,
-      topic.max_value,
-      topic.operations,
-      topic.order_index
-    );
-  });
-}
+topics.forEach(topic => {
+  insertTopic.run(
+    topic.name,
+    topic.description,
+    topic.difficulty,
+    topic.category,
+    topic.min_value,
+    topic.max_value,
+    topic.operations,
+    topic.order_index
+  );
+});
 
 const achievements = [
   { name: 'Первые шаги', description: 'Решил первый урок', icon: '👶', condition_type: 'lessons_completed', condition_value: 1 },
@@ -253,12 +255,9 @@ const insertAchievement = dbWrapper.prepare(`
   VALUES (?, ?, ?, ?, ?)
 `);
 
-const existingAchievements = dbWrapper.prepare('SELECT COUNT(*) as count FROM achievements').get();
-if ((existingAchievements?.count || 0) === 0) {
-  achievements.forEach(ach => {
-    insertAchievement.run(ach.name, ach.description, ach.icon, ach.condition_type, ach.condition_value);
-  });
-}
+achievements.forEach(ach => {
+  insertAchievement.run(ach.name, ach.description, ach.icon, ach.condition_type, ach.condition_value);
+});
 
 const farmAnimals = [
   { name: 'Свинья', type: 'pig', price: 100, description: 'Умная и дружелюбная свинья' },

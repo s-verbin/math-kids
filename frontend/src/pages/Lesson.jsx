@@ -284,6 +284,16 @@ const Lesson = () => {
                         </>
                       )}
                     </div>
+                    {feedback && currentProblem && (
+                      <div className="mt-4 text-center">
+                        <div className="text-3xl sm:text-4xl font-bold text-gray-800 tracking-wider">
+                          {(() => {
+                            const replacement = feedback.correctAnswer === '-' ? '' : feedback.correctAnswer;
+                            return currentProblem.question.replace('_', replacement);
+                          })()}
+                        </div>
+                      </div>
+                    )}
                     {!feedback.isCorrect && (
                       <div className="mt-2 text-sm sm:text-base text-gray-600">
                         Правильный ответ: <span className="font-bold text-2xl sm:text-3xl">{feedback.correctAnswer}</span>

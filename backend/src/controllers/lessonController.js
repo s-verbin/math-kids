@@ -240,6 +240,58 @@ const generateProblem = (topic) => {
     };
   }
 
+  if (operations === 'dictionary_words') {
+    const words = [
+      { word: 'с_лнце', answer: 'о', options: ['о', 'а', 'и'] },
+      { word: 'д_ждь', answer: 'о', options: ['о', 'а', 'и'] },
+      { word: 'к_рова', answer: 'о', options: ['о', 'а', 'и'] },
+      { word: 'г_риб', answer: 'р', options: ['р', 'л', 'н'] },
+      { word: 'з_мля', answer: 'е', options: ['е', 'и', 'я'] },
+      { word: 'м_ре', answer: 'о', options: ['о', 'а', 'е'] },
+      { word: 'ц_веток', answer: 'в', options: ['в', 'ф', 'п'] },
+      { word: 'п_года', answer: 'о', options: ['о', 'а', 'и'] },
+      { word: 'в_дро', answer: 'е', options: ['е', 'и', 'я'] },
+      { word: 'м_шина', answer: 'а', options: ['а', 'о', 'и'] },
+      { word: 'д_рево', answer: 'е', options: ['е', 'и', 'я'] },
+      { word: 'т_традь', answer: 'е', options: ['е', 'и', 'я'] },
+      { word: 'б_реза', answer: 'е', options: ['е', 'и', 'я'] },
+      { word: 'х_лод', answer: 'о', options: ['о', 'а', 'и'] },
+      { word: 'в_сна', answer: 'е', options: ['е', 'и', 'я'] },
+      { word: 'о_ень', answer: 'с', options: ['с', 'з', 'в'] },
+      { word: 'н_чь', answer: 'о', options: ['о', 'а', 'и'] },
+      { word: 'д_нь', answer: 'е', options: ['е', 'и', 'я'] },
+      { word: 'с_г', answer: 'н', options: ['н', 'м', 'л'] },
+      { word: 'д_рога', answer: 'о', options: ['о', 'а', 'и'] },
+      { word: 'к_мень', answer: 'а', options: ['а', 'о', 'и'] },
+      { word: 'п_мидор', answer: 'о', options: ['о', 'а', 'и'] },
+      { word: 'м_рковь', answer: 'о', options: ['о', 'а', 'и'] },
+      { word: 'к_пуста', answer: 'а', options: ['а', 'о', 'и'] },
+      { word: 'б_нан', answer: 'а', options: ['а', 'о', 'и'] },
+      { word: 'м_лина', answer: 'а', options: ['а', 'о', 'и'] },
+      { word: 'в_шня', answer: 'и', options: ['и', 'е', 'ы'] },
+      { word: 'в_локно', answer: 'о', options: ['о', 'а', 'и'] },
+      { word: 'с_бака', answer: 'о', options: ['о', 'а', 'и'] },
+      { word: 'к_нфета', answer: 'о', options: ['о', 'а', 'и'] },
+      { word: 'б_льница', answer: 'о', options: ['о', 'а', 'и'] },
+      { word: 'с_молёт', answer: 'а', options: ['а', 'о', 'и'] },
+      { word: 'т_левизор', answer: 'е', options: ['е', 'и', 'я'] },
+      { word: 'х_олодильник', answer: 'о', options: ['о', 'а', 'и'] },
+      { word: 'ц_ирк', answer: 'и', options: ['и', 'е', 'ы'] },
+      { word: 'ш_колад', answer: 'о', options: ['о', 'а', 'и'] },
+      { word: 'т_кси', answer: 'а', options: ['а', 'о', 'и'] },
+      { word: 'б_терброд', answer: 'у', options: ['у', 'о', 'а'] },
+      { word: 'к_рандаш', answer: 'а', options: ['а', 'о', 'и'] },
+      { word: 'ч_снок', answer: 'е', options: ['е', 'и', 'я'] }
+    ];
+    const word = words[Math.floor(Math.random() * words.length)];
+    return {
+      question: word.word,
+      answer: word.answer,
+      options: word.options,
+      type: 'russian'
+    };
+  }
+
   return { question: '1 + 1', answer: 2 };
 };
 
