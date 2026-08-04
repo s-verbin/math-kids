@@ -447,7 +447,7 @@ export const submitLesson = (req, res) => {
     VALUES (?, ?, ?, ?, ?)
   `).run(req.userId, topicId, correctCount, totalQuestions, timeSpent || null);
 
-  const xpGained = correctCount * 10;
+  const xpGained = correctCount * 5;
   const coinsGained = correctCount * 10;
   const user = db.prepare('SELECT xp, level, coins, total_problems_solved FROM users WHERE id = ?').get(req.userId);
   const newXp = user.xp + xpGained;
