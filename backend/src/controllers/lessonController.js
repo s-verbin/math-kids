@@ -1,5 +1,15 @@
 import db from '../models/database.js';
 
+const pluralize = (number, forms) => {
+  // forms = [one, few, many]
+  const n = Math.abs(number) % 100;
+  const n1 = n % 10;
+  if (n > 10 && n < 20) return forms[2];
+  if (n1 > 1 && n1 < 5) return forms[1];
+  if (n1 === 1) return forms[0];
+  return forms[2];
+};
+
 const generateProblem = (topic) => {
   const { operations, min_value, max_value, category } = topic;
 
@@ -294,60 +304,72 @@ const generateProblem = (topic) => {
 
   if (operations === 'fruits_add') {
     const fruits = [
-      { emoji: '🍎', name: 'яблок' },
-      { emoji: '🍐', name: 'груш' },
-      { emoji: '🍊', name: 'апельсинов' },
-      { emoji: '🍇', name: 'виноградин' },
-      { emoji: '🍌', name: 'бананов' }
+      { emoji: '🍎', forms: ['яблоко', 'яблока', 'яблок'] },
+      { emoji: '🍐', forms: ['груша', 'груши', 'груш'] },
+      { emoji: '🍊', forms: ['апельсин', 'апельсина', 'апельсинов'] },
+      { emoji: '🍇', forms: ['виноградина', 'виноградины', 'виноградин'] },
+      { emoji: '🍌', forms: ['банан', 'банана', 'бананов'] }
     ];
     const fruit1 = fruits[Math.floor(Math.random() * fruits.length)];
     const fruit2 = fruits[Math.floor(Math.random() * fruits.length)];
     const a = Math.floor(Math.random() * 5) + 1;
     const b = Math.floor(Math.random() * 5) + 1;
     return {
-      question: `На столе ${a} ${fruit1.emoji} ${fruit1.name} и ${b} ${fruit2.emoji} ${fruit2.name}. Сколько всего фруктов?`,
+      question: `На столе ${a} ${fruit1.emoji} ${pluralize(a, fruit1.forms)} и ${b} ${fruit2.emoji} ${pluralize(b, fruit2.forms)}. Сколько всего фруктов?`,
       answer: a + b
     };
   }
 
   if (operations === 'farm_legs') {
     const animals = [
-      { name: 'куриц', emoji: '🐔', legs: 2 },
-      { name: 'коров', emoji: '🐄', legs: 4 },
-      { name: 'свиней', emoji: '🐷', legs: 4 },
-      { name: 'собак', emoji: '🐕', legs: 4 },
-      { name: 'уток', emoji: '🦆', legs: 2 }
+      { forms: ['курица', 'курицы', 'куриц'], emoji: '🐔', legs: 2 },
+      { forms: ['корова', 'коровы', 'коров'], emoji: '🐄', legs: 4 },
+      { forms: ['свинья', 'свиньи', 'свиней'], emoji: '🐷', legs: 4 },
+      { forms: ['собака', 'собаки', 'собак'], emoji: '🐕', legs: 4 },
+      { forms: ['утка', 'утки', 'уток'], emoji: '🦆', legs: 2 }
     ];
     const animal1 = animals[Math.floor(Math.random() * animals.length)];
     const animal2 = animals[Math.floor(Math.random() * animals.length)];
     const a = Math.floor(Math.random() * 5) + 1;
     const b = Math.floor(Math.random() * 4) + 1;
     return {
-      question: `В загоне ${a} ${animal1.emoji} ${animal1.name} и ${b} ${animal2.emoji} ${animal2.name}. Сколько всего лап?`,
+      question: `В загоне ${a} ${animal1.emoji} ${pluralize(a, animal1.forms)} и ${b} ${animal2.emoji} ${pluralize(b, animal2.forms)}. Сколько всего лап?`,
       answer: a * animal1.legs + b * animal2.legs
     };
   }
 
   if (operations === 'compare_more') {
-    const items = ['конфет', 'машинок', 'игрушек', 'карандашей', 'мячей'];
+    const items = [
+      { forms: ['конфета', 'конфеты', 'конфет'] },
+      { forms: ['машинка', 'машинки', 'машинок'] },
+      { forms: ['игрушка', 'игрушки', 'игрушек'] },
+      { forms: ['карандаш', 'карандаша', 'карандашей'] },
+      { forms: ['мяч', 'мяча', 'мячей'] }
+    ];
     const item = items[Math.floor(Math.random() * items.length)];
     const a = Math.floor(Math.random() * 10) + 1;
     const b = Math.floor(Math.random() * 10) + 1;
     const [more, less] = a > b ? [a, b] : [b, a];
     return {
-      question: `У Маши ${more} ${item}, у Коли ${less}. На сколько больше у Маши?`,
+      question: `У Маши ${more} ${pluralize(more, item.forms)}, у Коли ${less} ${pluralize(less, item.forms)}. На сколько больше у Маши?`,
       answer: more - less
     };
   }
 
   if (operations === 'share_equal') {
-    const items = ['печенек', 'конфет', 'яблок', 'игрушек', 'мячей'];
+    const items = [
+      { forms: ['печенье', 'печенья', 'печений'] },
+      { forms: ['конфета', 'конфеты', 'конфет'] },
+      { forms: ['яблоко', 'яблока', 'яблок'] },
+      { forms: ['игрушка', 'игрушки', 'игрушек'] },
+      { forms: ['мяч', 'мяча', 'мячей'] }
+    ];
     const friends = Math.floor(Math.random() * 4) + 2;
     const portion = Math.floor(Math.random() * 5) + 1;
     const total = friends * portion;
     const item = items[Math.floor(Math.random() * items.length)];
     return {
-      question: `${total} ${item} разделили поровну между ${friends} друзьями. Сколько досталось каждому?`,
+      question: `${total} ${pluralize(total, item.forms)} разделили поровну между ${friends} друзьями. Сколько досталось каждому?`,
       answer: portion
     };
   }
