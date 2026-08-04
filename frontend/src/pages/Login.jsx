@@ -34,7 +34,7 @@ const Login = () => {
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
             Счетный двор
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">Учи математику с удовольствием!</p>
+          <p className="text-sm sm:text-base text-gray-600">Учи математику и русский с удовольствием.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
@@ -91,6 +91,20 @@ const Login = () => {
               Зарегистрируйся
             </Link>
           </p>
+        </div>
+
+        <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200 text-center">
+          <p className="text-xs sm:text-sm text-gray-500">
+            По вопросам, пожеланиям, доработкам, благодарностям:
+          </p>
+          <a
+            href="https://t.me/s_verbin"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm sm:text-base text-purple-600 font-semibold hover:text-purple-700 transition"
+          >
+            Телеграм: @s_verbin
+          </a>
         </div>
       </div>
     </div>
