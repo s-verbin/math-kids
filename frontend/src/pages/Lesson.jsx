@@ -41,21 +41,22 @@ const Lesson = () => {
     }
   };
 
-  const handleSubmit = (e) => {
-    if (e) e.preventDefault();
+  const handleSubmit = (e, answerOverride = null) => {
+    if (e && e.preventDefault) e.preventDefault();
     if (feedback || !problems[currentIndex]) return;
     
+    const currentAnswer = answerOverride !== null ? answerOverride : userAnswer;
     const currentProblem = problems[currentIndex];
     const isRussian = currentProblem?.type === 'russian';
     const correctAnswer = answers[currentIndex].answer;
     
     const isCorrect = isRussian 
-      ? String(userAnswer).trim() === String(correctAnswer).trim()
-      : parseInt(userAnswer) === correctAnswer;
+      ? String(currentAnswer).trim() === String(correctAnswer).trim()
+      : parseInt(currentAnswer) === correctAnswer;
 
     const answerData = {
       problemId: problems[currentIndex].id,
-      userAnswer: isRussian ? userAnswer : parseInt(userAnswer),
+      userAnswer: isRussian ? currentAnswer : parseInt(currentAnswer),
       correctAnswer: correctAnswer,
       isCorrect: isCorrect
     };
@@ -91,7 +92,7 @@ const Lesson = () => {
   const handleLetterClick = (letter) => {
     if (feedback) return;
     setUserAnswer(letter);
-    setTimeout(() => handleSubmit(), 300);
+    setTimeout(() => handleSubmit(null, letter), 300);
   };
 
   const finishLesson = async (allUserAnswers) => {
