@@ -49,4 +49,8 @@ export const farmAPI = {
   cleanPoop: () => api.post('/farm/clean-poop'),
 };
 
+export const analyticsAPI = {
+  startSession: (data) => api.post('/analytics/start', data),
+};
+
 export default api;

@@ -71,6 +71,20 @@ const dbWrapper = {
 };
 
 dbWrapper.exec(`
+  CREATE TABLE IF NOT EXISTS analytics_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    user_agent TEXT,
+    screen TEXT,
+    device_type TEXT,
+    browser TEXT,
+    os TEXT,
+    start_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    end_at DATETIME,
+    duration_seconds INTEGER,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
+
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
