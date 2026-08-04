@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { topicsAPI, lessonsAPI } from '../services/api';
-import { ArrowLeft, CheckCircle, XCircle, Trophy, Home, Coins } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, Trophy, Home, Coins, Check, X } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import NumberKeyboard from '../components/NumberKeyboard';
 

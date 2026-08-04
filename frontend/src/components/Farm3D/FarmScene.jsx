@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, Html } from '@react-three/drei';
 import { Suspense } from 'react';
@@ -8,6 +9,7 @@ import FarmBuilding from './FarmBuilding';
 import Draggable from './Draggable';
 
 const FarmScene = ({ animals = [], inventory = [] }) => {
+  const [isDragging, setIsDragging] = useState(false);
   const landCount = inventory.filter(item => item.category === 'land').reduce((sum, item) => sum + (item.quantity || 1), 0);
   const buildingItems = inventory.filter(item => item.category === 'building');
   const decorationItems = inventory.filter(item => item.category === 'decoration');
@@ -19,8 +21,9 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
           {/* Camera */}
           <PerspectiveCamera makeDefault position={[8, 6, 8]} fov={50} />
           
-          {/* Controls - ограниченные для изометрического вида */}
+          {/* Controls - отключаем при перетаскивании */}
           <OrbitControls
+            enabled={!isDragging}
             enablePan={false}
             enableZoom={true}
             minDistance={8}
@@ -68,7 +71,12 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
             ];
             const pos = positions[index % positions.length];
             return (
-              <Draggable key={`building-${item.id}-${index}`} position={pos}>
+              <Draggable
+                key={`building-${item.id}-${index}`}
+                position={pos}
+                onDragStart={() => setIsDragging(true)}
+                onDragEnd={() => setIsDragging(false)}
+              >
                 <FarmBuilding
                   position={[0, 0, 0]}
                   itemName={item.item_name}
@@ -89,7 +97,12 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
             ];
             const pos = positions[index % positions.length];
             return (
-              <Draggable key={`decor-${item.id}-${index}`} position={pos}>
+              <Draggable
+                key={`decor-${item.id}-${index}`}
+                position={pos}
+                onDragStart={() => setIsDragging(true)}
+                onDragEnd={() => setIsDragging(false)}
+              >
                 <FarmBuilding
                   position={[0, 0, 0]}
                   itemName={item.item_name}

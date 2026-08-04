@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
-const Draggable = ({ children, position, onDragEnd }) => {
+const Draggable = ({ children, position, onDragStart, onDragEnd }) => {
   const groupRef = useRef();
   const [isDragging, setIsDragging] = useState(false);
   const { camera, gl } = useThree();
@@ -64,6 +64,7 @@ const Draggable = ({ children, position, onDragEnd }) => {
   const handlePointerDown = (e) => {
     e.stopPropagation();
     setIsDragging(true);
+    if (onDragStart) onDragStart();
   };
 
   return (

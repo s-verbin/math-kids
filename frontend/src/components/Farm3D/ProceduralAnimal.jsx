@@ -188,7 +188,7 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, onClick }) 
         posRef.current.add(direction.multiplyScalar(step));
         // Поворачиваемся в направлении движения
         const angle = Math.atan2(direction.x, direction.z);
-        groupRef.current.rotation.y = angle + Math.PI;
+        groupRef.current.rotation.y = angle;
       }
     } else {
       // Ждём перед новым движением
