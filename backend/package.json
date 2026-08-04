@@ -1,0 +1,25 @@
+{
+  "name": "math-kids-backend",
+  "version": "1.0.0",
+  "description": "Backend for MathKids learning platform",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": ["math", "education", "kids"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "sql.js": "^1.12.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
