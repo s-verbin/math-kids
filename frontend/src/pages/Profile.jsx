@@ -194,9 +194,11 @@ const Profile = () => {
 
               {lockedAchievements.length > 0 && (
                 <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-600 mb-2 sm:mb-3">Заблокированы</h3>
+                  <h3 className="text-xs sm:text-sm font-semibold text-gray-600 mb-2 sm:mb-3">
+                    Заблокированы ({lockedAchievements.length})
+                  </h3>
                   <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                    {lockedAchievements.slice(0, 4).map((achievement) => (
+                    {lockedAchievements.map((achievement) => (
                       <div
                         key={achievement.id}
                         className="bg-gray-100 p-3 sm:p-4 rounded-xl opacity-60"

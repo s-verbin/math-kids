@@ -330,6 +330,26 @@ const Lesson = () => {
                         </>
                       )}
                     </div>
+                    {/* Показываем слово с подставленной буквой */}
+                    {isRussian && feedback.isCorrect && currentProblem && (
+                      <div className="mt-4 text-center">
+                        <div className="text-3xl sm:text-4xl font-bold text-gray-800 tracking-wider">
+                          {(() => {
+                            const parts = currentProblem.question.split('_');
+                            return (
+                              <>
+                                <span>{parts[0]}</span>
+                                <span className="text-green-600 text-4xl sm:text-5xl inline-block mx-0.5 animate-pulse">
+                                  {feedback.correctAnswer}
+                                </span>
+                                <span>{parts[1] || ''}</span>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    )}
+
                     {!feedback.isCorrect && (
                       <div className="mt-2 text-sm sm:text-base text-gray-600">
                         Правильный ответ: <span className="font-bold text-lg sm:text-xl">{feedback.correctAnswer}</span>
