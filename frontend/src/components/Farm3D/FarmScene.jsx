@@ -8,27 +8,18 @@ import ProceduralAnimal from './ProceduralAnimal';
 import FarmBuilding from './FarmBuilding';
 import Draggable from './Draggable';
 
-const Plants = ({ count = 50 }) => {
+const Plants = ({ positions, eatenRef }) => {
   const refs = useRef([]);
-  const positions = useMemo(() => {
-    return Array.from({ length: count }, (_, i) => {
-      const x = (Math.random() - 0.5) * 16;
-      const z = (Math.random() - 0.5) * 16;
-      const isFlower = Math.random() > 0.7;
-      const colors = ['#FF69B4', '#FFD700', '#9370DB', '#FFA500'];
-      return {
-        x,
-        z,
-        isFlower,
-        color: isFlower ? colors[Math.floor(Math.random() * colors.length)] : null
-      };
-    });
-  }, [count]);
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
     refs.current.forEach((ref, i) => {
       if (!ref) return;
+      if (eatenRef.current.has(i)) {
+        const s = Math.max(0, ref.scale.x - 0.05);
+        ref.scale.set(s, s, s);
+        return;
+      }
       const growth = 0.7 + 0.3 * (0.5 + 0.5 * Math.sin(time * 0.5 + i));
       ref.scale.set(growth, growth, growth);
     });
@@ -58,7 +49,7 @@ const Plants = ({ count = 50 }) => {
   );
 };
 
-const FarmScene = ({ animals = [], inventory = [] }) => {
+const FarmScene = ({ animals = [], inventory = [], onPetAnimal }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [draggedPositions, setDraggedPositions] = useState({});
   const landCount = inventory.filter(item => item.category === 'land').reduce((sum, item) => sum + (item.quantity || 1), 0);
@@ -66,6 +57,18 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
   const buildingItems = inventory.filter(item => item.category === 'building');
   const decorationItems = inventory.filter(item => item.category === 'decoration');
   const accessoryItems = inventory.filter(item => item.category === 'accessory');
+
+  const plantPositions = useMemo(() => {
+    return Array.from({ length: 60 }, (_, i) => {
+      const x = (Math.random() - 0.5) * 16;
+      const z = (Math.random() - 0.5) * 16;
+      const isFlower = Math.random() > 0.7;
+      const colors = ['#FF69B4', '#FFD700', '#9370DB', '#FFA500'];
+      return { x, z, isFlower, color: isFlower ? colors[Math.floor(Math.random() * colors.length)] : null };
+    });
+  }, []);
+
+  const eatenRef = useRef(new Set());
 
   return (
     <div className="w-full h-[500px] bg-gradient-to-b from-sky-200 to-sky-100 rounded-xl overflow-hidden shadow-lg">
@@ -113,7 +116,7 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
           <Ground landCount={landCount} />
 
           {/* Растения */}
-          <Plants count={60} />
+          <Plants positions={plantPositions} eatenRef={eatenRef} />
 
           {/* Постройки */}
           {buildingItems.map((item, index) => {
@@ -189,6 +192,9 @@ const FarmScene = ({ animals = [], inventory = [] }) => {
                 position={[x, 0, z]}
                 animalData={animal}
                 accessoryData={accessoryData}
+                plantPositions={plantPositions}
+                eatenRef={eatenRef}
+                onClick={onPetAnimal ? (data) => onPetAnimal(data.id) : undefined}
                 bounds={animalBounds}
               />
             );

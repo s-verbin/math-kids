@@ -148,21 +148,27 @@ const ANIMAL_CONFIGS = {
   }
 };
 
-const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryData = null, onClick, bounds = FARM_BOUNDS }) => {
+const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryData = null, plantPositions = [], eatenRef, onClick, bounds = FARM_BOUNDS }) => {
   const groupRef = useRef();
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
+  const [isLying, setIsLying] = useState(false);
   
   const posRef = useRef(new THREE.Vector3(position[0], position[1], position[2]));
   const targetRef = useRef(new THREE.Vector3(position[0], position[1], position[2]));
   const waitTimeRef = useRef(0);
   const isMovingRef = useRef(false);
   const legRefs = useRef([]);
+  const isLyingRef = useRef(false);
+  const lieTimeRef = useRef(0);
+  const baseY = position[1];
 
   const type = animalData?.type || 'pig';
   const config = ANIMAL_CONFIGS[type] || ANIMAL_CONFIGS.pig;
   const headY = config.size * (1.3 + config.neck);
   const labelFontSize = Math.max(10, Math.round(12 + config.size * 4));
+
+  const lerp = (a, b, t) => a + (b - a) * t;
 
   const getNewTarget = () => {
     const x = (Math.random() - 0.5) * 2 * bounds;
@@ -172,43 +178,76 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
-    
+
     // Обновляем позицию
     groupRef.current.position.x = posRef.current.x;
     groupRef.current.position.z = posRef.current.z;
-    
+
     if (clicked) return;
-    
+
+    // Синхронизуем индикатор сна
+    if (isLying !== isLyingRef.current) {
+      setIsLying(isLyingRef.current);
+    }
+
+    if (isLyingRef.current) {
+      // Животное отдыхает
+      lieTimeRef.current -= delta;
+      if (lieTimeRef.current <= 0) {
+        isLyingRef.current = false;
+      }
+      groupRef.current.position.y = lerp(groupRef.current.position.y, baseY - config.size * 0.35, 0.05);
+      groupRef.current.rotation.x = lerp(groupRef.current.rotation.x, -Math.PI / 6, 0.05);
+      groupRef.current.rotation.y = lerp(groupRef.current.rotation.y, 0, 0.05);
+      legRefs.current.forEach(leg => {
+        if (leg) leg.rotation.x = 0;
+      });
+      return;
+    }
+
     // Случайное движение
-    const speed = 0.4; // медленно
+    const speed = 0.4;
     const dist = posRef.current.distanceTo(targetRef.current);
-    
+
     if (isMovingRef.current) {
-      // Двигаемся к цели
       const direction = new THREE.Vector3().subVectors(targetRef.current, posRef.current).normalize();
       const step = speed * delta;
       const walkTime = state.clock.elapsedTime * 6;
-      
+
       if (dist < step) {
         posRef.current.copy(targetRef.current);
         isMovingRef.current = false;
-        waitTimeRef.current = Math.random() * 2 + 1; // ждём 1-3 секунды
-        // Сбрасываем поворот ног
+        waitTimeRef.current = Math.random() * 2 + 1;
         legRefs.current.forEach(leg => {
           if (leg) leg.rotation.x = 0;
         });
       } else {
         posRef.current.add(direction.multiplyScalar(step));
-        // Поворачиваемся в направлении движения
         const angle = Math.atan2(direction.x, direction.z);
         groupRef.current.rotation.y = angle;
       }
-      
+
+      // Животное ест растения, если проходит рядом
+      if (plantPositions.length && eatenRef) {
+        for (let i = 0; i < plantPositions.length; i++) {
+          if (!eatenRef.current.has(i)) {
+            const p = plantPositions[i];
+            const dx = posRef.current.x - p.x;
+            const dz = posRef.current.z - p.z;
+            if (dx * dx + dz * dz < 0.5) {
+              eatenRef.current.add(i);
+              isMovingRef.current = false;
+              waitTimeRef.current = 0.8;
+              break;
+            }
+          }
+        }
+      }
+
       // Анимация ходьбы
       groupRef.current.position.y = posRef.current.y + Math.abs(Math.sin(walkTime)) * 0.08;
       groupRef.current.rotation.x = Math.sin(walkTime) * 0.05;
-      
-      // Анимация ног - попеременный шаг
+
       const legCount = config.legs === 2 ? 2 : 4;
       for (let i = 0; i < legCount; i++) {
         const leg = legRefs.current[i];
@@ -221,16 +260,22 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       // Ждём перед новым движением
       waitTimeRef.current -= delta;
       if (waitTimeRef.current <= 0) {
-        targetRef.current = getNewTarget();
-        isMovingRef.current = true;
+        if (Math.random() < 0.0005) {
+          // Решили прилечь
+          isLyingRef.current = true;
+          lieTimeRef.current = Math.random() * 3 + 2;
+        } else {
+          targetRef.current = getNewTarget();
+          isMovingRef.current = true;
+        }
       }
       // Сбрасываем ноги и лёгкое покачивание
       legRefs.current.forEach(leg => {
         if (leg) leg.rotation.x = 0;
       });
-      groupRef.current.position.y = posRef.current.y + Math.sin(state.clock.elapsedTime * 2) * 0.05;
-      groupRef.current.rotation.x = 0;
-      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
+      groupRef.current.position.y = lerp(groupRef.current.position.y, posRef.current.y + Math.sin(state.clock.elapsedTime * 2) * 0.05, 0.1);
+      groupRef.current.rotation.x = lerp(groupRef.current.rotation.x, 0, 0.1);
+      groupRef.current.rotation.y = posRef.current.x * 0.02 + Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
     }
   });
 
@@ -555,6 +600,13 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
             {animalData.isHungry ? '😢' : ''}
             {animalData.needsPetting ? '😔' : ''}
           </div>
+        </Html>
+      )}
+
+      {/* Сон */}
+      {isLying && (
+        <Html position={[0, headY + 0.9, 0]} center distanceFactor={10}>
+          <div style={{ fontSize: `${Math.max(16, Math.round(24 * config.size))}px` }}>💤</div>
         </Html>
       )}
 
