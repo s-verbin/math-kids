@@ -166,6 +166,64 @@ export const petAnimal = (req, res) => {
   res.json({ success: true, message: 'Животное довольно!' });
 };
 
+export const sellAnimal = (req, res) => {
+  const { userAnimalId } = req.body;
+  
+  const animal = db.prepare(`
+    SELECT ua.*, fa.price
+    FROM user_animals ua
+    JOIN farm_animals fa ON ua.animal_id = fa.id
+    WHERE ua.id = ? AND ua.user_id = ?
+  `).get(userAnimalId, req.userId);
+  
+  if (!animal) {
+    return res.status(404).json({ error: 'Животное не найдено' });
+  }
+  
+  const refund = Math.floor(animal.price / 2);
+  
+  db.prepare('UPDATE users SET coins = coins + ? WHERE id = ?').run(refund, req.userId);
+  db.prepare('DELETE FROM user_animals WHERE id = ?').run(userAnimalId);
+  
+  const user = db.prepare('SELECT coins FROM users WHERE id = ?').get(req.userId);
+  
+  res.json({
+    success: true,
+    newCoins: user.coins,
+    refund,
+    message: `Животное продано за ${refund} монет`
+  });
+};
+
+export const sellItem = (req, res) => {
+  const { inventoryId } = req.body;
+  
+  const item = db.prepare(`
+    SELECT ui.*, fi.price
+    FROM user_inventory ui
+    JOIN farm_items fi ON ui.item_id = fi.id
+    WHERE ui.id = ? AND ui.user_id = ?
+  `).get(inventoryId, req.userId);
+  
+  if (!item) {
+    return res.status(404).json({ error: 'Предмет не найден' });
+  }
+  
+  const refund = Math.floor(item.price / 2) * (item.quantity || 1);
+  
+  db.prepare('UPDATE users SET coins = coins + ? WHERE id = ?').run(refund, req.userId);
+  db.prepare('DELETE FROM user_inventory WHERE id = ?').run(inventoryId);
+  
+  const user = db.prepare('SELECT coins FROM users WHERE id = ?').get(req.userId);
+  
+  res.json({
+    success: true,
+    newCoins: user.coins,
+    refund,
+    message: `Предмет продан за ${refund} монет`
+  });
+};
+
 export const equipItem = (req, res) => {
   const { inventoryId, userAnimalId } = req.body;
   

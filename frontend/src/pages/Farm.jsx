@@ -72,6 +72,26 @@ const Farm = () => {
     }
   };
 
+  const handleSellAnimal = async (userAnimalId) => {
+    if (!confirm('Точно продать животное?')) return;
+    try {
+      await farmAPI.sellAnimal(userAnimalId);
+      await loadData();
+    } catch (error) {
+      alert(error.response?.data?.error || 'Ошибка продажи');
+    }
+  };
+
+  const handleSellItem = async (inventoryId) => {
+    if (!confirm('Точно продать предмет?')) return;
+    try {
+      await farmAPI.sellItem(inventoryId);
+      await loadData();
+    } catch (error) {
+      alert(error.response?.data?.error || 'Ошибка продажи');
+    }
+  };
+
   if (loading) {
     return (
       <>
@@ -269,7 +289,7 @@ const Farm = () => {
                       </div>
 
                       {/* Actions */}
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => handleFeedAnimal(animal.id)}
                           className="flex-1 py-2 px-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-1 text-sm"
@@ -283,6 +303,12 @@ const Farm = () => {
                         >
                           <Heart size={16} />
                           Погладить
+                        </button>
+                        <button
+                          onClick={() => handleSellAnimal(animal.id)}
+                          className="w-full py-2 px-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center justify-center gap-1 text-sm"
+                        >
+                          Продать за {Math.floor(animal.price / 2)}
                         </button>
                       </div>
 
@@ -309,13 +335,19 @@ const Farm = () => {
                       .filter(item => item.category === 'land' || item.category === 'building')
                       .map((item) => (
                         <div key={item.id} className="card bg-gradient-to-br from-amber-50 to-amber-100 p-4">
-                          <div className="text-center">
+                          <div className="text-center mb-3">
                             <div className="text-5xl mb-2">{getItemEmoji(item.item_name, item.category)}</div>
                             <div className="text-sm font-bold text-gray-800">{item.item_name}</div>
                             {item.quantity > 1 && (
                               <div className="text-xs text-gray-600 mt-1">Количество: {item.quantity}</div>
                             )}
                           </div>
+                          <button
+                            onClick={() => handleSellItem(item.id)}
+                            className="w-full py-2 px-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm"
+                          >
+                            Продать за {Math.floor(item.price / 2) * (item.quantity || 1)}
+                          </button>
                         </div>
                       ))}
                   </div>
@@ -339,6 +371,12 @@ const Farm = () => {
                           {item.quantity > 1 && (
                             <div className="text-xs text-gray-500 mt-1">x{item.quantity}</div>
                           )}
+                          <button
+                            onClick={() => handleSellItem(item.id)}
+                            className="mt-2 w-full py-1.5 px-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-xs"
+                          >
+                            Продать за {Math.floor(item.price / 2) * (item.quantity || 1)}
+                          </button>
                         </div>
                       ))}
                   </div>

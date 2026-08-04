@@ -7,7 +7,9 @@ import {
   buyItem, 
   feedAnimal, 
   petAnimal,
-  equipItem 
+  equipItem,
+  sellAnimal,
+  sellItem
 } from '../controllers/farmController.js';
 
 const router = express.Router();
@@ -19,5 +21,7 @@ router.post('/buy-item', authMiddleware, buyItem);
 router.post('/feed', authMiddleware, feedAnimal);
 router.post('/pet', authMiddleware, petAnimal);
 router.post('/equip', authMiddleware, equipItem);
+router.post('/sell-animal', authMiddleware, sellAnimal);
+router.post('/sell-item', authMiddleware, sellItem);
 
 export default router;
