@@ -203,7 +203,7 @@ const Farm = () => {
                 </div>
                 
                 {view3D && (
-                  <FarmScene animals={myFarm.animals} />
+                  <FarmScene animals={myFarm.animals} inventory={myFarm.inventory} />
                 )}
               </div>
 
