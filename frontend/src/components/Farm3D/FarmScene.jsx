@@ -11,6 +11,13 @@ import Draggable from './Draggable';
 
 const Fence = ({ bounds }) => {
   const half = bounds + 0.3;
+  const segmentCount = 12;
+  const step = (half * 2) / segmentCount;
+  const posts = [];
+  for (let i = 0; i <= segmentCount; i++) {
+    const p = -half + i * step;
+    posts.push([-half, p], [half, p], [p, -half], [p, half]);
+  }
   const rails = [
     [-half, -half, half, -half],
     [half, -half, half, half],
@@ -20,9 +27,15 @@ const Fence = ({ bounds }) => {
   return (
     <group>
       {rails.map((r, i) => (
-        <mesh key={i} castShadow position={[(r[0] + r[2]) / 2, 0.45, (r[1] + r[3]) / 2]}>
-          <boxGeometry args={[Math.max(0.1, Math.abs(r[2] - r[0])), 0.06, Math.max(0.1, Math.abs(r[3] - r[1]))]} />
+        <mesh key={`rail-${i}`} castShadow position={[(r[0] + r[2]) / 2, 0.45, (r[1] + r[3]) / 2]}>
+          <boxGeometry args={[Math.max(0.1, Math.abs(r[2] - r[0])), 0.04, Math.max(0.1, Math.abs(r[3] - r[1]))]} />
           <meshStandardMaterial color='#A0522D' roughness={0.9} />
+        </mesh>
+      ))}
+      {posts.map((p, i) => (
+        <mesh key={`post-${i}`} castShadow position={[p[0], 0.35, p[1]]}>
+          <boxGeometry args={[0.12, 0.7, 0.12]} />
+          <meshStandardMaterial color='#8B4513' roughness={0.9} />
         </mesh>
       ))}
     </group>

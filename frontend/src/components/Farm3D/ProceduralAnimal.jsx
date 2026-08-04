@@ -151,6 +151,7 @@ const ANIMAL_CONFIGS = {
 const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryData = null, plantPositions = [], eatenRef, obstacles = [], onPoop, onClick, bounds = FARM_BOUNDS }) => {
   const groupRef = useRef();
   const bodyRef = useRef();
+  const shadowRef = useRef();
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
   const [isLying, setIsLying] = useState(false);
@@ -199,7 +200,10 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
     groupRef.current.position.x = posRef.current.x;
     groupRef.current.position.z = posRef.current.z;
 
-    if (clicked) return;
+    if (clicked) {
+      if (shadowRef.current) shadowRef.current.position.y = 0.01 - groupRef.current.position.y;
+      return;
+    }
 
     // Синхронизуем индикатор сна
     if (isLying !== isLyingRef.current) {
@@ -231,6 +235,7 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       legRefs.current.forEach(leg => {
         if (leg) leg.rotation.x = 0;
       });
+      if (shadowRef.current) shadowRef.current.position.y = 0.01 - groupRef.current.position.y;
       return;
     }
 
@@ -324,6 +329,8 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       groupRef.current.rotation.y = posRef.current.x * 0.02 + Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
       if (bodyRef.current) bodyRef.current.scale.set(config.bodyScale[0] * breath, config.bodyScale[1] * breath, config.bodyScale[2] * breath);
     }
+
+    if (shadowRef.current) shadowRef.current.position.y = 0.01 - groupRef.current.position.y;
   });
 
   const handleClick = (e) => {
@@ -564,6 +571,12 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       onPointerOut={() => setHovered(false)}
       onClick={handleClick}
     >
+      {/* Мягкая тень под ногами */}
+      <mesh ref={shadowRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+        <circleGeometry args={[config.size * 0.7, 16]} />
+        <meshBasicMaterial color='#000000' transparent opacity={0.18} />
+      </mesh>
+
       {/* Тело */}
       <mesh ref={bodyRef} castShadow position={[0, config.size * 1.1, 0]} scale={config.bodyScale}>
         <sphereGeometry args={[config.size, 16, 16]} />
