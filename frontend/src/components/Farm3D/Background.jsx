@@ -71,6 +71,12 @@ const Background = () => {
 
   return (
     <group>
+      {/* Небесный купол — закрывает пустое пространство при вращении */}
+      <mesh>
+        <sphereGeometry args={[80, 32, 32]} />
+        <meshBasicMaterial color='#E0F2FE' side={THREE.BackSide} />
+      </mesh>
+
       {/* Основная зелёная равнина */}
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.06, 0]}>
         <circleGeometry args={[60, 32]} />
@@ -151,6 +157,17 @@ const Background = () => {
         {makeCloudTree([1.5, 0, -1], 0.75)}
         {makeCloudTree([-1.5, 0, 0.5], 0.85)}
       </group>
+
+      {/* Низкие холмы по краям, чтобы не было пустого поля */}
+      {[
+        [-50, 0, 40, '#AED581'], [50, 0, 45, '#C5E1A5'], [0, 0, 55, '#AED581'],
+        [-35, 0, -5, '#C8E6C9'], [40, 0, 0, '#A5D6A7']
+      ].map(([x, y, z, color], i) => (
+        <mesh key={`edge-hill-${i}`} position={[x, y - 0.2, z]} scale={[8, 1.2, 6]}>
+          <sphereGeometry args={[1, 16, 16]} />
+          <meshStandardMaterial color={color} roughness={1} />
+        </mesh>
+      ))}
 
       {/* Цветы на переднем плане */}
       {[
