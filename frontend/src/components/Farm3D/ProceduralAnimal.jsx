@@ -148,7 +148,7 @@ const ANIMAL_CONFIGS = {
   }
 };
 
-const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryData = null, plantPositions = [], eatenRef, obstacles = [], onClick, bounds = FARM_BOUNDS }) => {
+const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryData = null, plantPositions = [], eatenRef, obstacles = [], onPoop, onClick, bounds = FARM_BOUNDS }) => {
   const groupRef = useRef();
   const bodyRef = useRef();
   const [hovered, setHovered] = useState(false);
@@ -162,6 +162,7 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
   const legRefs = useRef([]);
   const isLyingRef = useRef(false);
   const lieTimeRef = useRef(0);
+  const poopTimerRef = useRef(Math.random() * 20 + 10);
   const baseY = position[1];
   const MIN_OBSTACLE_DIST = 1.8;
 
@@ -207,6 +208,15 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
 
     // Дыхание
     const breath = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.03;
+
+    // Какашки
+    if (onPoop) {
+      poopTimerRef.current -= delta;
+      if (poopTimerRef.current <= 0) {
+        onPoop({ x: posRef.current.x, z: posRef.current.z, size: config.size });
+        poopTimerRef.current = Math.random() * 30 + 30;
+      }
+    }
 
     if (isLyingRef.current) {
       // Животное отдыхает

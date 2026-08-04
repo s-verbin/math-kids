@@ -72,6 +72,15 @@ const Farm = () => {
     }
   };
 
+  const handleCleanPoop = async (poopId) => {
+    try {
+      const response = await farmAPI.cleanPoop();
+      setMyFarm(prev => ({ ...prev, coins: response.data.newCoins }));
+    } catch (error) {
+      alert(error.response?.data?.error || 'Ошибка уборки');
+    }
+  };
+
   const handleSellAnimal = async (userAnimalId) => {
     if (!confirm('Точно продать животное?')) return;
     try {
@@ -222,7 +231,12 @@ const Farm = () => {
                 </div>
                 
                 {view3D && (
-                  <FarmScene animals={myFarm.animals} inventory={myFarm.inventory} onPetAnimal={handlePetAnimal} />
+                  <FarmScene
+                    animals={myFarm.animals}
+                    inventory={myFarm.inventory}
+                    onPetAnimal={handlePetAnimal}
+                    onCleanPoop={handleCleanPoop}
+                  />
                 )}
               </div>
 

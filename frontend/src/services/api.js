@@ -50,6 +50,7 @@ export const farmAPI = {
   equipItem: (inventoryId, userAnimalId) => api.post('/farm/equip', { inventoryId, userAnimalId }),
   sellAnimal: (userAnimalId) => api.post('/farm/sell-animal', { userAnimalId }),
   sellItem: (inventoryId) => api.post('/farm/sell-item', { inventoryId }),
+  cleanPoop: () => api.post('/farm/clean-poop'),
 };
 
 export default api;

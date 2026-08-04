@@ -40,11 +40,12 @@ const Path = ({ bounds }) => {
 
 const Critters = ({ count = 12 }) => {
   const refs = useRef([]);
+  const wingRefs = useRef([]);
   const data = useMemo(() => Array.from({ length: count }, (_, i) => {
     const type = i % 3 === 0 ? 'bird' : i % 3 === 1 ? 'bee' : 'fly';
     const center = {
       x: (Math.random() - 0.5) * 10,
-      y: 1.5 + Math.random() * 3,
+      y: 2 + Math.random() * 3,
       z: (Math.random() - 0.5) * 10
     };
     const speed = 0.4 + Math.random() * 0.6;
@@ -61,8 +62,13 @@ const Critters = ({ count = 12 }) => {
       const x = d.center.x + Math.cos(t * d.speed + d.phase) * d.radius;
       const z = d.center.z + Math.sin(t * d.speed + d.phase) * d.radius;
       const y = d.center.y + Math.sin(t * d.speed * 1.5 + d.phase) * 0.3;
+      const dx = -Math.sin(t * d.speed + d.phase) * d.radius * d.speed;
+      const dz = Math.cos(t * d.speed + d.phase) * d.radius * d.speed;
       ref.position.set(x, y, z);
-      ref.rotation.y = -t * d.speed + d.phase;
+      ref.rotation.y = Math.atan2(dx, dz);
+      if (d.type === 'bird' && wingRefs.current[i]) {
+        wingRefs.current[i].rotation.z = Math.sin(t * 12) * 0.5;
+      }
     });
   });
 
@@ -71,10 +77,38 @@ const Critters = ({ count = 12 }) => {
       {data.map((d, i) => (
         <group key={i} ref={el => refs.current[i] = el}>
           {d.type === 'bird' ? (
-            <mesh>
-              <coneGeometry args={[0.07, 0.22, 5]} rotation={[Math.PI / 2, 0, 0]} />
-              <meshStandardMaterial color='#ffffff' />
-            </mesh>
+            <>
+              <mesh castShadow position={[0, 0, 0]}>
+                <sphereGeometry args={[0.06, 8, 8]} />
+                <meshStandardMaterial color='#ffffff' />
+              </mesh>
+              <mesh castShadow position={[0.1, 0.02, 0]}>
+                <sphereGeometry args={[0.035, 8, 8]} />
+                <meshStandardMaterial color='#ffffff' />
+              </mesh>
+              <mesh castShadow position={[0.14, 0.02, 0]} rotation={[0, 0, -Math.PI / 2]}>
+                <coneGeometry args={[0.018, 0.07, 8]} />
+                <meshStandardMaterial color='#FF9900' />
+              </mesh>
+              <mesh position={[0.07, 0.03, 0.04]}>
+                <sphereGeometry args={[0.01, 4, 4]} />
+                <meshStandardMaterial color='#000000' />
+              </mesh>
+              <mesh position={[0.07, 0.03, -0.04]}>
+                <sphereGeometry args={[0.01, 4, 4]} />
+                <meshStandardMaterial color='#000000' />
+              </mesh>
+              <group ref={el => wingRefs.current[i] = el} position={[0, 0.04, 0]}>
+                <mesh position={[-0.08, 0, 0]}>
+                  <boxGeometry args={[0.14, 0.01, 0.06]} />
+                  <meshStandardMaterial color='#ffffff' transparent opacity={0.9} />
+                </mesh>
+                <mesh position={[0.08, 0, 0]}>
+                  <boxGeometry args={[0.14, 0.01, 0.06]} />
+                  <meshStandardMaterial color='#ffffff' transparent opacity={0.9} />
+                </mesh>
+              </group>
+            </>
           ) : d.type === 'bee' ? (
             <>
               <mesh>
@@ -98,6 +132,39 @@ const Critters = ({ count = 12 }) => {
           )}
         </group>
       ))}
+    </group>
+  );
+};
+
+const Poop = ({ data, onClean }) => {
+  return (
+    <group position={[data.x, 0, data.z]}>
+      <mesh
+        castShadow
+        onClick={(e) => { e.stopPropagation(); onClean(); }}
+        position={[0, data.size * 0.12, 0]}
+      >
+        <sphereGeometry args={[data.size * 0.2, 8, 8]} scale={[1, 0.6, 1]} />
+        <meshStandardMaterial color='#5D4037' roughness={1} />
+      </mesh>
+      <Html position={[0, data.size * 0.45, 0]} center distanceFactor={10}>
+        <button
+          onClick={onClean}
+          style={{
+            background: '#FFF8E7',
+            color: '#5D4037',
+            border: 'none',
+            borderRadius: '12px',
+            padding: '2px 8px',
+            fontSize: '12px',
+            fontFamily: '"Comic Sans MS", cursive, sans-serif',
+            cursor: 'pointer',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.15)'
+          }}
+        >
+          🧹 +1
+        </button>
+      </Html>
     </group>
   );
 };
@@ -143,9 +210,10 @@ const Plants = ({ positions, eatenRef }) => {
   );
 };
 
-const FarmScene = ({ animals = [], inventory = [], onPetAnimal }) => {
+const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [draggedPositions, setDraggedPositions] = useState({});
+  const [poops, setPoops] = useState([]);
   const landCount = inventory.filter(item => item.category === 'land').reduce((sum, item) => sum + (item.quantity || 1), 0);
   const animalBounds = 9 + landCount * 3;
   const buildingItems = inventory.filter(item => item.category === 'building');
@@ -174,6 +242,17 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal }) => {
     });
     return list;
   }, [buildingItems, decorationItems, draggedPositions]);
+
+  const addPoop = (poop) => {
+    setPoops(prev => [...prev, { id: Date.now() + Math.random(), ...poop }]);
+  };
+
+  const removePoop = async (id) => {
+    if (onCleanPoop) {
+      await onCleanPoop(id);
+    }
+    setPoops(prev => prev.filter(p => p.id !== id));
+  };
 
   const plantPositions = useMemo(() => {
     return Array.from({ length: 60 }, (_, i) => {
@@ -241,6 +320,11 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal }) => {
 
           {/* Птицы, пчёлы и мухи */}
           <Critters count={15} />
+
+          {/* Какашки */}
+          {poops.map(p => (
+            <Poop key={p.id} data={p} onClean={() => removePoop(p.id)} />
+          ))}
 
           {/* Постройки */}
           {buildingItems.map((item, index) => {
@@ -319,6 +403,7 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal }) => {
                 plantPositions={plantPositions}
                 eatenRef={eatenRef}
                 obstacles={obstacles}
+                onPoop={addPoop}
                 onClick={onPetAnimal ? (data) => onPetAnimal(data.id) : undefined}
                 bounds={animalBounds}
               />

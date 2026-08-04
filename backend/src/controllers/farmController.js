@@ -195,6 +195,18 @@ export const sellAnimal = (req, res) => {
   });
 };
 
+export const cleanPoop = (req, res) => {
+  const reward = 1;
+  db.prepare('UPDATE users SET coins = coins + ? WHERE id = ?').run(reward, req.userId);
+  const user = db.prepare('SELECT coins FROM users WHERE id = ?').get(req.userId);
+  res.json({
+    success: true,
+    newCoins: user.coins,
+    reward,
+    message: `Убрано! +${reward} монет`
+  });
+};
+
 export const sellItem = (req, res) => {
   const { inventoryId } = req.body;
   
