@@ -22,6 +22,7 @@ export const authAPI = {
 export const userAPI = {
   getProfile: () => api.get('/user/profile'),
   updateAvatar: (avatar) => api.put('/user/avatar', { avatar }),
+  updateLeaderboardVisibility: (show) => api.put('/user/leaderboard-visibility', { showInLeaderboard: show }),
 };
 
 export const topicsAPI = {

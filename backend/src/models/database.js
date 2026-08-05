@@ -71,6 +71,12 @@ const dbWrapper = {
 };
 
 try {
+  db.exec('ALTER TABLE users ADD COLUMN show_in_leaderboard INTEGER DEFAULT 1;');
+} catch {
+  // Колонка уже существует
+}
+
+try {
   db.exec('ALTER TABLE users ADD COLUMN accepted_terms_at DATETIME;');
 } catch {
   // Колонка уже существует
@@ -87,6 +93,7 @@ dbWrapper.exec(`
     xp INTEGER DEFAULT 0,
     coins INTEGER DEFAULT 0,
     total_problems_solved INTEGER DEFAULT 0,
+    show_in_leaderboard INTEGER DEFAULT 1,
     accepted_terms_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );

@@ -548,6 +548,7 @@ export const getLeaderboard = (req, res) => {
       xp,
       total_problems_solved
     FROM users
+    WHERE show_in_leaderboard = 1
     ORDER BY xp DESC
     LIMIT 10
   `).all();

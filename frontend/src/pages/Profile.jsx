@@ -19,6 +19,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [parentMode, setParentMode] = useState(false);
+  const [showInLeaderboard, setShowInLeaderboard] = useState(true);
 
   useEffect(() => {
     loadProfile();
@@ -54,6 +55,22 @@ const Profile = () => {
       setShowAvatarPicker(false);
     } catch (error) {
       console.error('Error updating avatar:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (profile?.user) {
+      setShowInLeaderboard(profile.user.showInLeaderboard ?? true);
+    }
+  }, [profile]);
+
+  const handleLeaderboardToggle = async (show) => {
+    setShowInLeaderboard(show);
+    try {
+      await userAPI.updateLeaderboardVisibility(show);
+    } catch (error) {
+      console.error('Error updating leaderboard visibility:', error);
+      setShowInLeaderboard(!show);
     }
   };
 
@@ -236,6 +253,29 @@ const Profile = () => {
                 </div>
               </div>
             )}
+          </div>
+
+          <div className="card mb-6 sm:mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800">🏆 Лидерборд</h2>
+                <p className="text-sm text-gray-600 mt-1">Показывать меня в общем рейтинге</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleLeaderboardToggle(!showInLeaderboard)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
+                  showInLeaderboard ? 'bg-purple-600' : 'bg-gray-300'
+                }`}
+                aria-pressed={showInLeaderboard}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                    showInLeaderboard ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">

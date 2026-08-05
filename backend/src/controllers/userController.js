@@ -2,7 +2,7 @@ import db from '../models/database.js';
 
 export const getProfile = (req, res) => {
   const user = db.prepare(`
-    SELECT id, username, display_name, avatar, level, xp, coins, total_problems_solved, created_at
+    SELECT id, username, display_name, avatar, level, xp, coins, total_problems_solved, show_in_leaderboard, created_at
     FROM users WHERE id = ?
   `).get(req.userId);
 
@@ -101,6 +101,7 @@ export const getProfile = (req, res) => {
       xp: user.xp,
       coins: user.coins,
       totalProblemsSolved: user.total_problems_solved,
+      showInLeaderboard: user.show_in_leaderboard === 1,
       createdAt: user.created_at
     },
     completedTopics: completedTopics.map(t => t.topic_id),
@@ -128,4 +129,13 @@ export const updateAvatar = (req, res) => {
   db.prepare('UPDATE users SET avatar = ? WHERE id = ?').run(avatar, req.userId);
 
   res.json({ success: true, avatar });
+};
+
+export const updateLeaderboardVisibility = (req, res) => {
+  const { showInLeaderboard } = req.body;
+  const show = showInLeaderboard ? 1 : 0;
+
+  db.prepare('UPDATE users SET show_in_leaderboard = ? WHERE id = ?').run(show, req.userId);
+
+  res.json({ success: true, showInLeaderboard: show === 1 });
 };
