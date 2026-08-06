@@ -166,7 +166,7 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
   const legRefs = useRef([]);
   const isLyingRef = useRef(false);
   const lieTimeRef = useRef(0);
-  const poopTimerRef = useRef(Math.random() * 20 + 10);
+  const poopTimerRef = useRef(Math.random() * 60 + 60);
   const baseY = position[1];
   const MIN_OBSTACLE_DIST = 1.8;
 
@@ -216,12 +216,12 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
     // Дыхание
     const breath = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.03;
 
-    // Какашки
+    // Какашки (реже)
     if (onPoop) {
       poopTimerRef.current -= delta;
       if (poopTimerRef.current <= 0) {
         onPoop({ x: posRef.current.x, z: posRef.current.z, size: config.size });
-        poopTimerRef.current = Math.random() * 30 + 30;
+        poopTimerRef.current = Math.random() * 60 + 60; // 60-120 секунд
       }
     }
 
@@ -401,25 +401,24 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
     </>
   );
 
-  // Шерсть для овец
+  // Шерсть для овец (оптимизировано)
   const wool = config.wool && useMemo(() => {
     const woolBalls = [];
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 15; i++) { // уменьшено с 25 до 15
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.random() * Math.PI;
       const r = config.size * 0.85;
       const x = r * Math.sin(phi) * Math.cos(theta);
       const y = config.size + r * Math.cos(phi) * 0.6;
       const z = r * Math.sin(phi) * Math.sin(theta);
-      const size = 0.08 + Math.random() * 0.06;
+      const size = 0.1 + Math.random() * 0.08; // крупнее
       woolBalls.push(
         <mesh
           key={`wool-${i}`}
           ref={el => furRefs.current[i] = el}
           position={[x, y, z]}
-          castShadow
         >
-          <sphereGeometry args={[size, 6, 6]} />
+          <sphereGeometry args={[size, 4, 4]} />
           <meshStandardMaterial color={color} roughness={1} />
         </mesh>
       );
@@ -516,33 +515,31 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
     </>
   );
 
-  // Крылья с перьями для птиц
+  // Крылья с перьями для птиц (оптимизировано)
   const wings = config.wings && useMemo(() => {
     const leftFeathers = [];
     const rightFeathers = [];
-    for (let i = 0; i < 5; i++) {
-      const offset = i * 0.08;
+    for (let i = 0; i < 3; i++) { // уменьшено с 5 до 3
+      const offset = i * 0.1;
       leftFeathers.push(
         <mesh
           key={`left-feather-${i}`}
           ref={el => featherRefs.current[i] = el}
-          castShadow
           position={[-config.size * 0.65 - offset, config.size * 1.15, offset * 0.5]}
           rotation={[0, 0, -0.3 - i * 0.1]}
         >
-          <boxGeometry args={[config.size * 0.15, config.size * 0.04, config.size * 0.25]} />
+          <boxGeometry args={[config.size * 0.18, config.size * 0.04, config.size * 0.3]} />
           <meshStandardMaterial color={config.darkColor} roughness={0.8} />
         </mesh>
       );
       rightFeathers.push(
         <mesh
           key={`right-feather-${i}`}
-          ref={el => featherRefs.current[i + 5] = el}
-          castShadow
+          ref={el => featherRefs.current[i + 3] = el}
           position={[config.size * 0.65 + offset, config.size * 1.15, offset * 0.5]}
           rotation={[0, 0, 0.3 + i * 0.1]}
         >
-          <boxGeometry args={[config.size * 0.15, config.size * 0.04, config.size * 0.25]} />
+          <boxGeometry args={[config.size * 0.18, config.size * 0.04, config.size * 0.3]} />
           <meshStandardMaterial color={config.darkColor} roughness={0.8} />
         </mesh>
       );
@@ -564,19 +561,18 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
     </mesh>
   );
 
-  // Грива для лошадей и ослов
+  // Грива для лошадей и ослов (оптимизировано)
   const mane = (type === 'horse' || type === 'donkey') && useMemo(() => {
     const maneStrands = [];
-    for (let i = 0; i < 10; i++) {
-      const zOffset = (i - 4.5) * 0.08;
+    for (let i = 0; i < 6; i++) { // уменьшено с 10 до 6
+      const zOffset = (i - 2.5) * 0.1;
       maneStrands.push(
         <mesh
           key={`mane-${i}`}
           ref={el => maneRefs.current[i + 10] = el}
-          castShadow
           position={[0, config.size * (1.3 + config.neck) + 0.15, zOffset]}
         >
-          <boxGeometry args={[0.03, 0.25, 0.02]} />
+          <boxGeometry args={[0.04, 0.28, 0.03]} />
           <meshStandardMaterial color={config.darkColor} roughness={0.9} />
         </mesh>
       );
@@ -603,16 +599,15 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
         );
       case 'hair':
         const hairStrands = [];
-        for (let i = 0; i < 8; i++) {
-          const xOffset = (i - 3.5) * 0.03;
+        for (let i = 0; i < 5; i++) { // уменьшено с 8 до 5
+          const xOffset = (i - 2) * 0.04;
           hairStrands.push(
             <mesh
               key={`hair-${i}`}
               ref={el => maneRefs.current[i] = el}
-              castShadow
               position={[xOffset, config.size * 0.6, -config.size * 1.05]}
             >
-              <boxGeometry args={[0.02, 0.35, 0.02]} />
+              <boxGeometry args={[0.03, 0.4, 0.03]} />
               <meshStandardMaterial color="#4a4a4a" roughness={0.9} />
             </mesh>
           );

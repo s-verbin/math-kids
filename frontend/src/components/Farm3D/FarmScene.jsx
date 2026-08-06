@@ -154,16 +154,22 @@ const Critters = ({ count = 12 }) => {
 };
 
 const Poop = ({ data, onClean }) => {
+  const handleClick = (e) => {
+    e.stopPropagation();
+    onClean();
+  };
+
   return (
     <group position={[data.x, 0, data.z]}>
       <mesh
         castShadow
         receiveShadow
-        onClick={(e) => { e.stopPropagation(); onClean(); }}
-        position={[0, data.size * 0.22, 0]}
-        scale={[1, 0.55, 1]}
+        onClick={handleClick}
+        onPointerDown={handleClick}
+        position={[0, data.size * 0.3, 0]}
+        scale={[1.2, 0.6, 1.2]}
       >
-        <sphereGeometry args={[data.size * 0.35, 14, 14]} />
+        <sphereGeometry args={[data.size * 0.4, 10, 10]} />
         <meshStandardMaterial color='#3E2723' roughness={0.9} metalness={0.05} />
       </mesh>
       <Html position={[0, 0.85, 0]} center distanceFactor={10}>
