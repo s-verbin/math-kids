@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { marketAPI, productionAPI } from '../services/api';
+import eventBus, { EVENTS } from '../services/EventBus';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 const Market = ({ onUpdate }) => {
@@ -32,7 +33,16 @@ const Market = ({ onUpdate }) => {
     
     setSelling(resourceType);
     try {
-      await marketAPI.sellResource(resourceType, quantity);
+      const response = await marketAPI.sellResource(resourceType, quantity);
+      
+      eventBus.emit(EVENTS.COINS_EARNED, { amount: response.data.totalEarned });
+      
+      if (response.data.unlockedAchievements?.length > 0) {
+        response.data.unlockedAchievements.forEach(achievement => {
+          eventBus.emit(EVENTS.ACHIEVEMENT_UNLOCKED, achievement);
+        });
+      }
+      
       await loadData();
       if (onUpdate) onUpdate();
     } catch (error) {

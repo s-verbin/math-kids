@@ -1,35 +1,35 @@
-import { useState, useEffect, useRef } from 'react';
-import eventBus, { EVENTS } from '../services/EventBus';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { productionAPI } from '../services/api';
 
-// Конфигурация производства для каждого типа животного
+// Конфигурация производства — используем в основном для иконок/fallback
 const PRODUCTION_CONFIG = {
   chicken: {
     resourceType: 'egg',
-    productionTime: 7200, // 2 часа в секундах
+    productionTime: 7200,
     value: 5,
     icon: '🥚'
   },
   duck: {
     resourceType: 'egg',
-    productionTime: 10800, // 3 часа
+    productionTime: 10800,
     value: 7,
     icon: '🥚'
   },
   cow: {
     resourceType: 'milk',
-    productionTime: 14400, // 4 часа
+    productionTime: 14400,
     value: 15,
     icon: '🥛'
   },
   goat: {
     resourceType: 'milk',
-    productionTime: 10800, // 3 часа
+    productionTime: 10800,
     value: 10,
     icon: '🥛'
   },
   sheep: {
     resourceType: 'wool',
-    productionTime: 86400, // 24 часа
+    productionTime: 86400,
     value: 25,
     icon: '🧶'
   }
@@ -41,64 +41,60 @@ export const useAnimalProduction = (animalType, animalId, happiness = 100, hunge
     timeRemaining: 0,
     resourceType: null,
     resourceValue: 0,
-    icon: null
+    icon: null,
+    canProduce: false,
+    isLoading: true
   });
 
-  const timerRef = useRef(null);
+  const tickRef = useRef(null);
+  const syncRef = useRef(null);
   const config = PRODUCTION_CONFIG[animalType];
 
-  useEffect(() => {
-    if (!config) return;
+  const fetchStatus = useCallback(async () => {
+    if (!config || !animalId) return;
+    try {
+      const response = await productionAPI.getStatus();
+      const animal = response.data.production.find(a => a.animalId === animalId);
 
-    // Рассчитываем бонусы от счастья и сытости
-    const happinessBonus = happiness >= 80 ? 0.2 : 0;
-    const hungerBonus = hunger >= 80 ? 0.1 : 0;
-    const totalBonus = 1 + happinessBonus + hungerBonus;
-
-    const adjustedTime = config.productionTime / totalBonus;
-
-    // Инициализация таймера
-    let remainingTime = adjustedTime;
-
-    const updateTimer = () => {
-      remainingTime -= 1;
-
-      if (remainingTime <= 0) {
+      if (animal && animal.canProduce) {
         setProductionState({
-          isReady: true,
-          timeRemaining: 0,
-          resourceType: config.resourceType,
-          resourceValue: config.value,
-          icon: config.icon
+          isReady: animal.isReady,
+          timeRemaining: animal.timeRemaining || 0,
+          resourceType: animal.resourceType,
+          resourceValue: animal.value,
+          icon: config.icon,
+          canProduce: true,
+          isLoading: false
         });
-
-        // Эмитим событие о готовности ресурса
-        eventBus.emit(EVENTS.RESOURCE_READY, {
-          animalId,
-          animalType,
-          resourceType: config.resourceType,
-          value: config.value
-        });
-
-        clearInterval(timerRef.current);
       } else {
-        setProductionState(prev => ({
-          ...prev,
-          timeRemaining: remainingTime,
-          resourceType: config.resourceType,
-          icon: config.icon
-        }));
+        setProductionState(prev => ({ ...prev, canProduce: false, isLoading: false }));
       }
-    };
+    } catch (error) {
+      console.error('Error fetching production status:', error);
+      setProductionState(prev => ({ ...prev, isLoading: false }));
+    }
+  }, [config, animalId]);
 
-    timerRef.current = setInterval(updateTimer, 1000);
+  useEffect(() => {
+    setProductionState(prev => ({ ...prev, isLoading: true }));
+    fetchStatus();
+
+    // Синхронизация с бэкендом каждые 5 секунд (важно для авто-сбора)
+    syncRef.current = setInterval(fetchStatus, 5000);
+
+    // Локальный тик раз в секунду для плавного отсчёта
+    tickRef.current = setInterval(() => {
+      setProductionState(prev => {
+        if (prev.isReady || prev.timeRemaining <= 0) return prev;
+        return { ...prev, timeRemaining: Math.max(0, prev.timeRemaining - 1) };
+      });
+    }, 1000);
 
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
+      clearInterval(tickRef.current);
+      clearInterval(syncRef.current);
     };
-  }, [animalType, animalId, happiness, hunger]);
+  }, [fetchStatus]);
 
   const collectResource = () => {
     if (!productionState.isReady) return null;
@@ -110,17 +106,8 @@ export const useAnimalProduction = (animalType, animalId, happiness = 100, hunge
       animalType
     };
 
-    // Эмитим событие о сборе ресурса
-    eventBus.emit(EVENTS.RESOURCE_COLLECTED, resource);
-
-    // Сбрасываем состояние и запускаем новый цикл
-    setProductionState({
-      isReady: false,
-      timeRemaining: config.productionTime,
-      resourceType: config.resourceType,
-      resourceValue: config.value,
-      icon: config.icon
-    });
+    // Запрещаем повторный клик до следующего синка
+    setProductionState(prev => ({ ...prev, isReady: false, timeRemaining: 0 }));
 
     return resource;
   };
@@ -141,8 +128,8 @@ export const useAnimalProduction = (animalType, animalId, happiness = 100, hunge
 
   return {
     ...productionState,
-    canProduce: !!config,
     collectResource,
+    refresh: fetchStatus,
     formattedTime: formatTime(productionState.timeRemaining)
   };
 };

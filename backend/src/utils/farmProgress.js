@@ -1,4 +1,5 @@
 import db from '../models/database.js';
+import { generateDailyQuests } from '../controllers/questsController.js';
 
 const QUEST_TYPES = [
   'collect_eggs', 'collect_milk', 'collect_wool',
@@ -38,6 +39,9 @@ export const incrementFarmStat = (userId, stat, value = 1) => {
 
 export const updateDailyQuestProgress = (userId, questType, increment = 1) => {
   if (!QUEST_TYPES.includes(questType)) return;
+
+  // Гарантируем, что на сегодня уже есть квесты
+  generateDailyQuests(userId);
 
   const today = new Date().toISOString().split('T')[0];
   const quest = db.prepare(`

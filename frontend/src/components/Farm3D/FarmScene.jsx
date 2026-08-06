@@ -304,8 +304,20 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop, onD
     try {
       const response = await productionAPI.collectResource(resource.animalId);
       
-      // Эмитим событие для обновления UI
-      eventBus.emit(EVENTS.COINS_EARNED, { amount: resource.value });
+      // Уведомляем о сборе ресурса
+      eventBus.emit(EVENTS.RESOURCE_COLLECTED, {
+        type: response.data.resourceType,
+        value: response.data.value,
+        animalId: resource.animalId,
+        animalType: resource.animalType
+      });
+      
+      // Уведомляем о разблокированных достижениях
+      if (response.data.unlockedAchievements?.length > 0) {
+        response.data.unlockedAchievements.forEach(achievement => {
+          eventBus.emit(EVENTS.ACHIEVEMENT_UNLOCKED, achievement);
+        });
+      }
       
       // Обновляем данные фермы
       if (onDataUpdate) {

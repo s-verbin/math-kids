@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { craftingAPI } from '../services/api';
+import eventBus, { EVENTS } from '../services/EventBus';
 import { Hammer, CheckCircle, XCircle } from 'lucide-react';
 
 const Crafting = ({ onUpdate }) => {
@@ -28,6 +29,15 @@ const Crafting = ({ onUpdate }) => {
     setCrafting(recipeId);
     try {
       const response = await craftingAPI.craftItem(recipeId);
+      
+      eventBus.emit(EVENTS.COINS_EARNED, { amount: response.data.value });
+      
+      if (response.data.unlockedAchievements?.length > 0) {
+        response.data.unlockedAchievements.forEach(achievement => {
+          eventBus.emit(EVENTS.ACHIEVEMENT_UNLOCKED, achievement);
+        });
+      }
+      
       alert(`✨ Создано: ${response.data.crafted}! +${response.data.value} 💰`);
       await loadData();
       if (onUpdate) onUpdate();

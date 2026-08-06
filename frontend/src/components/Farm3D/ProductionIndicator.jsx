@@ -6,11 +6,14 @@ const ProductionIndicator = ({ animalType, animalId, happiness, hunger, position
 
   if (!production.canProduce) return null;
 
-  const handleClick = (e) => {
+  const handleClick = async (e) => {
     e.stopPropagation();
     if (production.isReady && onCollect) {
       const resource = production.collectResource();
-      onCollect(resource);
+      if (resource) {
+        await onCollect(resource);
+        production.refresh();
+      }
     }
   };
 

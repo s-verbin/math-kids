@@ -12,7 +12,7 @@ const QUEST_TYPES = [
 ];
 
 // Генерация ежедневных заданий
-const generateDailyQuests = (userId) => {
+export const generateDailyQuests = (userId) => {
   const today = new Date().toISOString().split('T')[0];
   
   // Проверяем, есть ли уже задания на сегодня
