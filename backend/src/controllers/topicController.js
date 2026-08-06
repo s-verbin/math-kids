@@ -7,7 +7,7 @@ export const getTopics = (req, res) => {
     SELECT 
       topic_id,
       COUNT(*) as attempts,
-      MAX(score) as best_score,
+      MAX(CASE WHEN completed = 1 THEN score END) as best_score,
       AVG(CAST(score AS FLOAT) / total_questions * 100) as avg_accuracy
     FROM lessons
     WHERE user_id = ?

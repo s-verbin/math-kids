@@ -441,26 +441,53 @@ export const submitLesson = (req, res) => {
 
   const correctCount = answers.filter(a => a.isCorrect).length;
   const totalQuestions = answers.length;
+  const isCompleted = totalQuestions === 10;
 
   const result = db.prepare(`
-    INSERT INTO lessons (user_id, topic_id, score, total_questions, time_spent)
-    VALUES (?, ?, ?, ?, ?)
-  `).run(req.userId, topicId, correctCount, totalQuestions, timeSpent || null);
+    INSERT INTO lessons (user_id, topic_id, score, total_questions, time_spent, completed)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(req.userId, topicId, correctCount, totalQuestions, timeSpent || null, isCompleted ? 1 : 0);
 
-  const xpGained = correctCount * 5;
-  const coinsGained = correctCount * 10;
   const user = db.prepare('SELECT xp, level, coins, total_problems_solved FROM users WHERE id = ?').get(req.userId);
-  const newXp = user.xp + xpGained;
-  const chestCoins = correctCount > 0 ? Math.floor(Math.random() * 15) + 1 : 0;
-  const newCoins = user.coins + coinsGained + chestCoins;
-  const newLevel = Math.floor(newXp / 100) + 1;
-  const newTotalProblems = user.total_problems_solved + totalQuestions;
 
-  db.prepare(`
-    UPDATE users 
-    SET xp = ?, level = ?, coins = ?, total_problems_solved = ?
-    WHERE id = ?
-  `).run(newXp, newLevel, newCoins, newTotalProblems, req.userId);
+  let xpGained = 0;
+  let coinsGained = 0;
+  let chestCoins = 0;
+  let newXp = user.xp;
+  let newCoins = user.coins;
+  let newLevel = user.level;
+  let leveledUp = false;
+  let newTotalProblems = user.total_problems_solved + totalQuestions;
+
+  // Незавершённые уроки сохраняются, но не дают наград и не считаются достижением
+  if (isCompleted) {
+    xpGained = correctCount * 5;
+    coinsGained = correctCount * 10;
+    newXp = user.xp + xpGained;
+    chestCoins = correctCount > 0 ? Math.floor(Math.random() * 15) + 1 : 0;
+    newCoins = user.coins + coinsGained + chestCoins;
+    newLevel = Math.floor(newXp / 100) + 1;
+    leveledUp = newLevel > user.level;
+
+    db.prepare(`
+      UPDATE users 
+      SET xp = ?, level = ?, coins = ?, total_problems_solved = ?
+      WHERE id = ?
+    `).run(newXp, newLevel, newCoins, newTotalProblems, req.userId);
+
+    checkAndUnlockAchievements(req.userId, {
+      lessonsCompleted: 1,
+      perfectScore: correctCount === totalQuestions,
+      timeSpent: timeSpent,
+      topicId: topicId
+    });
+  } else {
+    db.prepare(`
+      UPDATE users 
+      SET total_problems_solved = ?
+      WHERE id = ?
+    `).run(newTotalProblems, req.userId);
+  }
 
   const today = new Date().toISOString().split('T')[0];
   db.prepare(`
@@ -471,25 +498,17 @@ export const submitLesson = (req, res) => {
       correct_answers = correct_answers + ?
   `).run(req.userId, today, totalQuestions, correctCount, totalQuestions, correctCount);
 
-  checkAndUnlockAchievements(req.userId, {
-    lessonsCompleted: 1,
-    perfectScore: correctCount === totalQuestions,
-    timeSpent: timeSpent,
-    topicId: topicId
-  });
-
-  const leveledUp = newLevel > user.level;
-
   res.json({
     lessonId: result.lastInsertRowid,
     score: correctCount,
     total: totalQuestions,
+    completed: isCompleted ? 1 : 0,
     xpGained,
     coinsGained,
-    chest: {
+    chest: isCompleted ? {
       coins: chestCoins,
       message: 'Случайный сундук с монетами!'
-    },
+    } : { coins: 0, message: '' },
     newXp,
     newCoins,
     newLevel,

@@ -82,6 +82,12 @@ try {
   // Колонка уже существует
 }
 
+try {
+  db.exec('ALTER TABLE lessons ADD COLUMN completed INTEGER DEFAULT 1;');
+} catch {
+  // Колонка уже существует
+}
+
 dbWrapper.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -119,6 +125,7 @@ dbWrapper.exec(`
     score INTEGER NOT NULL,
     total_questions INTEGER NOT NULL,
     time_spent INTEGER,
+    completed INTEGER NOT NULL DEFAULT 1,
     completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (topic_id) REFERENCES topics(id)

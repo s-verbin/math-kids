@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { topicsAPI, lessonsAPI } from '../services/api';
 import { ArrowLeft, CheckCircle, XCircle, Trophy, Home, Coins, Check, X } from 'lucide-react';
@@ -16,12 +16,62 @@ const Lesson = () => {
   const [feedback, setFeedback] = useState(null);
   const [completed, setCompleted] = useState(false);
   const [result, setResult] = useState(null);
-  const [startTime] = useState(Date.now());
   const [userAnswers, setUserAnswers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const userAnswersRef = useRef([]);
+  const completedRef = useRef(false);
+  const submittingRef = useRef(false);
+  const startTimeRef = useRef(Date.now());
+
   useEffect(() => {
     startLesson();
+  }, [topicId]);
+
+  useEffect(() => {
+    const topicIdNum = parseInt(topicId);
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+    const sendProgress = () => {
+      if (completedRef.current || submittingRef.current) return;
+      if (userAnswersRef.current.length === 0) return;
+
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const timeSpent = Math.floor((Date.now() - startTimeRef.current) / 1000);
+
+      fetch(`${baseUrl}/lessons/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          topicId: topicIdNum,
+          answers: userAnswersRef.current,
+          timeSpent
+        }),
+        keepalive: true
+      });
+    };
+
+    const handleBeforeUnload = () => sendProgress();
+    const handlePageHide = () => sendProgress();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') sendProgress();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handlePageHide);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handlePageHide);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      sendProgress();
+    };
   }, [topicId]);
 
   const startLesson = async () => {
@@ -34,6 +84,16 @@ const Lesson = () => {
       setTopic(topicRes.data.topic);
       setProblems(lessonRes.data.problems);
       setAnswers(lessonRes.data.answers);
+      setUserAnswers([]);
+      setCurrentIndex(0);
+      setUserAnswer('');
+      setFeedback(null);
+      setCompleted(false);
+      setResult(null);
+      userAnswersRef.current = [];
+      completedRef.current = false;
+      submittingRef.current = false;
+      startTimeRef.current = Date.now();
       setLoading(false);
     } catch (error) {
       console.error('Error starting lesson:', error);
@@ -61,7 +121,9 @@ const Lesson = () => {
       isCorrect: isCorrect
     };
 
-    setUserAnswers([...userAnswers, answerData]);
+    const nextAnswers = [...userAnswersRef.current, answerData];
+    userAnswersRef.current = nextAnswers;
+    setUserAnswers(nextAnswers);
 
     setFeedback({
       isCorrect,
@@ -74,7 +136,7 @@ const Lesson = () => {
         setUserAnswer('');
         setFeedback(null);
       } else {
-        finishLesson([...userAnswers, answerData]);
+        finishLesson(nextAnswers);
       }
     }, 1500);
   };
@@ -96,7 +158,9 @@ const Lesson = () => {
   };
 
   const finishLesson = async (allUserAnswers) => {
-    const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    const timeSpent = Math.floor((Date.now() - startTimeRef.current) / 1000);
 
     try {
       const response = await lessonsAPI.submit({
@@ -107,8 +171,10 @@ const Lesson = () => {
       
       setResult(response.data);
       setCompleted(true);
+      completedRef.current = true;
     } catch (error) {
       console.error('Error submitting lesson:', error);
+      submittingRef.current = false;
     }
   };
 

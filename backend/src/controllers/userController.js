@@ -85,8 +85,8 @@ export const getProfile = (req, res) => {
   const records = db.prepare(`
     SELECT 
       COALESCE(MAX(score), 0) as best_score,
-      COALESCE(SUM(CASE WHEN score = total_questions THEN 1 ELSE 0 END), 0) as perfect_lessons,
-      COALESCE(MIN(CASE WHEN score = total_questions THEN time_spent END), 0) as fastest_time
+      COALESCE(SUM(CASE WHEN completed = 1 AND score = total_questions THEN 1 ELSE 0 END), 0) as perfect_lessons,
+      COALESCE(MIN(CASE WHEN completed = 1 AND score = total_questions THEN time_spent END), 0) as fastest_time
     FROM lessons
     WHERE user_id = ?
   `).get(req.userId);
