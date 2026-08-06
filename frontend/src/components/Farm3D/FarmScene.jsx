@@ -9,6 +9,7 @@ import ProceduralAnimal from './ProceduralAnimal';
 import FarmBuilding from './FarmBuilding';
 import Draggable from './Draggable';
 import ResourcesManager from './containers/ResourcesManager';
+import FarmUpgrade from './FarmUpgrade';
 import { productionAPI } from '../../services/api';
 import eventBus, { EVENTS } from '../../services/EventBus';
 
@@ -247,6 +248,7 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop, onD
   const buildingItems = inventory.filter(item => item.category === 'building');
   const decorationItems = inventory.filter(item => item.category === 'decoration');
   const accessoryItems = inventory.filter(item => item.category === 'accessory');
+  const upgradeItems = inventory.filter(item => item.category === 'upgrade');
 
   const obstacles = useMemo(() => {
     const positions = [
@@ -475,6 +477,22 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop, onD
               </div>
             </Html>
           )}
+
+          {/* Улучшения фермы */}
+          {upgradeItems.map((item, index) => {
+            const count = Math.max(upgradeItems.length, 1);
+            const angle = (index / count) * Math.PI * 2;
+            const radius = Math.min(animalBounds * 0.9, 6);
+            const x = Math.cos(angle) * radius;
+            const z = Math.sin(angle) * radius;
+            return (
+              <FarmUpgrade
+                key={item.id}
+                itemName={item.item_name || item.name}
+                position={[x, 0, z]}
+              />
+            );
+          })}
 
           {/* Менеджер ресурсов */}
           <ResourcesManager animals={animals} />
