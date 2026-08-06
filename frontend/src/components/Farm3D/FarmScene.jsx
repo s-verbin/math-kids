@@ -9,9 +9,13 @@ import ProceduralAnimal from './ProceduralAnimal';
 import FarmBuilding from './FarmBuilding';
 import Draggable from './Draggable';
 
-const Fence = ({ bounds }) => {
-  const half = bounds + 0.3;
-  const segmentCount = 12;
+const Fence = ({ landCount }) => {
+  // Базовая земля 20x20, каждый участок добавляет ~7.5 в радиус
+  const baseSize = 10; // половина от 20x20
+  const extraSize = Math.ceil(Math.sqrt(landCount)) * 5; // расширение в зависимости от участков
+  const half = baseSize + extraSize + 0.5; // небольшой отступ за границу
+  
+  const segmentCount = Math.max(12, Math.floor(half / 1.5));
   const step = (half * 2) / segmentCount;
   const posts = [];
   for (let i = 0; i <= segmentCount; i++) {
@@ -329,7 +333,7 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop }) =
           <Ground landCount={landCount} />
 
           {/* Забор и тропинки */}
-          <Fence bounds={animalBounds} />
+          <Fence landCount={landCount} />
           <Path bounds={animalBounds} />
 
           {/* Растения */}

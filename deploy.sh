@@ -32,7 +32,6 @@ rsync -avz --delete \
   --exclude='.git' \
   --exclude='mathkids.db' \
   --exclude='dist' \
-  --exclude='.env' \
   --exclude='*.log' \
   ./ "$SSH_HOST:${REMOTE_DIR}/"
 
