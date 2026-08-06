@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import FarmBuilding from './FarmBuilding';
+import ProductionIndicator from './ProductionIndicator';
 
 const FARM_BOUNDS = 9; // Животные не выходят за пределы 20x20 земли
 
@@ -148,7 +149,7 @@ const ANIMAL_CONFIGS = {
   }
 };
 
-const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryData = null, plantPositions = [], eatenRef, obstacles = [], onPoop, onClick, bounds = FARM_BOUNDS }) => {
+const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryData = null, plantPositions = [], eatenRef, obstacles = [], onPoop, onClick, onResourceCollect, bounds = FARM_BOUNDS }) => {
   const groupRef = useRef();
   const bodyRef = useRef();
   const shadowRef = useRef();
@@ -792,6 +793,18 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
         <Html position={[0, headY + 0.9, 0]} center distanceFactor={10}>
           <div style={{ fontSize: `${Math.max(16, Math.round(24 * config.size))}px` }}>💤</div>
         </Html>
+      )}
+
+      {/* Индикатор производства */}
+      {animalData && (
+        <ProductionIndicator
+          animalType={type}
+          animalId={animalData.id}
+          happiness={animalData.happiness || 100}
+          hunger={animalData.hunger || 100}
+          position={[0, headY + 1.2, 0]}
+          onCollect={onResourceCollect}
+        />
       )}
 
       {/* Аксессуар */}

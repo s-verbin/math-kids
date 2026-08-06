@@ -8,6 +8,9 @@ import Background from './Background';
 import ProceduralAnimal from './ProceduralAnimal';
 import FarmBuilding from './FarmBuilding';
 import Draggable from './Draggable';
+import ResourcesManager from './containers/ResourcesManager';
+import { productionAPI } from '../../services/api';
+import eventBus, { EVENTS } from '../../services/EventBus';
 
 const Fence = ({ landCount }) => {
   // Базовая земля 20x20, каждый участок добавляет ~7.5 в радиус
@@ -235,7 +238,7 @@ const Plants = ({ positions, eatenRef }) => {
   );
 };
 
-const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop }) => {
+const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop, onDataUpdate }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [draggedPositions, setDraggedPositions] = useState({});
   const [poops, setPoops] = useState([]);
@@ -292,6 +295,24 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop }) =
   }, [landCount, animalBounds]);
 
   const eatenRef = useRef(new Set());
+
+  const handleResourceCollect = async (resource) => {
+    if (!resource) return;
+    
+    try {
+      const response = await productionAPI.collectResource(resource.animalId);
+      
+      // Эмитим событие для обновления UI
+      eventBus.emit(EVENTS.COINS_EARNED, { amount: resource.value });
+      
+      // Обновляем данные фермы
+      if (onDataUpdate) {
+        onDataUpdate();
+      }
+    } catch (error) {
+      console.error('Error collecting resource:', error);
+    }
+  };
 
   return (
     <div className="w-full h-[500px] bg-gradient-to-b from-sky-200 to-sky-100 rounded-xl overflow-hidden shadow-lg">
@@ -432,6 +453,7 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop }) =
                 obstacles={obstacles}
                 onPoop={addPoop}
                 onClick={onPetAnimal ? (data) => onPetAnimal(data.id) : undefined}
+                onResourceCollect={handleResourceCollect}
                 bounds={animalBounds}
               />
             );
@@ -453,6 +475,9 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop }) =
               </div>
             </Html>
           )}
+
+          {/* Менеджер ресурсов */}
+          <ResourcesManager animals={animals} />
 
           {/* Дополнительное освещение для объёма */}
           <pointLight position={[-5, 5, -5]} intensity={0.3} color="#ffd4a3" />

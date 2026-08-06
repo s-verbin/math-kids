@@ -236,6 +236,7 @@ const Farm = () => {
                     inventory={myFarm.inventory}
                     onPetAnimal={handlePetAnimal}
                     onCleanPoop={handleCleanPoop}
+                    onDataUpdate={loadData}
                   />
                 )}
               </div>

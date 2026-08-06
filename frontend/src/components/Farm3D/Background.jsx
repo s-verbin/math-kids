@@ -1,6 +1,9 @@
 import { useRef, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
+import Birds from './background/Birds';
+import Butterflies from './background/Butterflies';
+import DayNightCycle from './background/DayNightCycle';
 
 const Background = () => {
   const { scene } = useThree();
@@ -83,15 +86,14 @@ const Background = () => {
         <meshStandardMaterial color='#C5E1A5' roughness={1} />
       </mesh>
 
-      {/* Солнце с мягким свечением */}
-      <mesh position={[-45, 45, -70]}>
-        <sphereGeometry args={[6, 32, 32]} />
-        <meshBasicMaterial color='#FFD54F' />
-      </mesh>
-      <mesh position={[-45, 45, -70]} scale={[1.8, 1.8, 1.8]}>
-        <sphereGeometry args={[6, 32, 32]} />
-        <meshBasicMaterial color='#FFECB3' transparent opacity={0.18} />
-      </mesh>
+      {/* Система день/ночь */}
+      <DayNightCycle cycleDuration={600} />
+
+      {/* Птицы на фоне */}
+      <Birds count={7} />
+
+      {/* Бабочки */}
+      <Butterflies count={5} />
 
       {/* Облака */}
       {makeCloud([-45, 38, -40], [4, 3, 3], 0)}
@@ -136,26 +138,43 @@ const Background = () => {
         </group>
       </group>
 
-      {/* Лесные массивы */}
+      {/* Лесные массивы - увеличено количество */}
       <group position={[-30, 0, -5]} scale={[0.9, 0.9, 0.9]}>
         {makeCloudTree([-2, 0, 0], 1)}
         {makeCloudTree([1.5, 0, 1.2], 0.8)}
         {makeCloudTree([0.2, 0, -1.5], 1.1)}
+        {makeCloudTree([-3.5, 0, 0.8], 0.9)}
+        {makeCloudTree([2.8, 0, -0.5], 0.85)}
       </group>
       <group position={[35, 0, -10]} scale={[1.1, 1.1, 1.1]}>
         {makeCloudTree([-1.5, 0, 0], 1)}
         {makeCloudTree([2, 0, 0.5], 0.85)}
         {makeCloudTree([0, 0, -1.2], 0.95)}
         {makeCloudTree([3.5, 0, -0.8], 0.75)}
+        {makeCloudTree([-3, 0, 1], 0.9)}
+        {makeCloudTree([1, 0, 2], 0.8)}
       </group>
       <group position={[15, 0, -28]} scale={[0.8, 0.8, 0.8]}>
         {makeCloudTree([0, 0, 0], 1)}
         {makeCloudTree([-2, 0, 1], 0.7)}
+        {makeCloudTree([1.5, 0, -1.5], 0.85)}
+        {makeCloudTree([-1, 0, -1], 0.75)}
       </group>
       <group position={[-48, 0, -28]} scale={[0.8, 0.8, 0.8]}>
         {makeCloudTree([0, 0, 0], 1)}
         {makeCloudTree([1.5, 0, -1], 0.75)}
         {makeCloudTree([-1.5, 0, 0.5], 0.85)}
+        {makeCloudTree([2.5, 0, 0.8], 0.9)}
+      </group>
+      {/* Новые группы деревьев */}
+      <group position={[-20, 0, -18]} scale={[0.7, 0.7, 0.7]}>
+        {makeCloudTree([0, 0, 0], 1)}
+        {makeCloudTree([1.8, 0, 0.5], 0.8)}
+        {makeCloudTree([-1.2, 0, -0.8], 0.9)}
+      </group>
+      <group position={[25, 0, -20]} scale={[0.9, 0.9, 0.9]}>
+        {makeCloudTree([0, 0, 0], 0.95)}
+        {makeCloudTree([-2, 0, 0.8], 0.85)}
       </group>
 
       {/* Низкие холмы по краям, чтобы не было пустого поля */}
