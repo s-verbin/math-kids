@@ -145,7 +145,8 @@ ssh "$SSH_HOST" << REMOTE_SCRIPT
     -d "${DOMAIN}" -d "www.${DOMAIN}" \
     --non-interactive --agree-tos \
     --email "admin@${DOMAIN}" \
-    --keep-until-expiring
+    --keep-until-expiring \
+    --expand
 
   # Перезагружаем nginx ещё раз
   systemctl reload nginx || nginx -s reload
