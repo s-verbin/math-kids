@@ -270,14 +270,16 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop }) =
   };
 
   const plantPositions = useMemo(() => {
-    return Array.from({ length: 60 }, (_, i) => {
-      const x = (Math.random() - 0.5) * 16;
-      const z = (Math.random() - 0.5) * 16;
+    const plantCount = 60 + landCount * 20;
+    const spread = animalBounds * 1.6;
+    return Array.from({ length: plantCount }, (_, i) => {
+      const x = (Math.random() - 0.5) * spread;
+      const z = (Math.random() - 0.5) * spread;
       const isFlower = Math.random() > 0.7;
       const colors = ['#FF69B4', '#FFD700', '#9370DB', '#FFA500'];
       return { x, z, isFlower, color: isFlower ? colors[Math.floor(Math.random() * colors.length)] : null };
     });
-  }, []);
+  }, [landCount, animalBounds]);
 
   const eatenRef = useRef(new Set());
 
