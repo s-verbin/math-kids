@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { topicsAPI, lessonsAPI } from '../services/api';
-import { ArrowLeft, CheckCircle, XCircle, Trophy, Home, Coins, Check, X } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, Trophy, Home, Coins, Check, X, LogIn } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import NumberKeyboard from '../components/NumberKeyboard';
+import { useAuth } from '../context/AuthContext';
 
 const Lesson = () => {
   const { topicId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [topic, setTopic] = useState(null);
   const [problems, setProblems] = useState([]);
   const [answers, setAnswers] = useState([]);
@@ -162,6 +164,36 @@ const Lesson = () => {
     submittingRef.current = true;
     const timeSpent = Math.floor((Date.now() - startTimeRef.current) / 1000);
 
+    if (!user) {
+      const correctCount = allUserAnswers.filter(a => a.isCorrect).length;
+      const totalQuestions = allUserAnswers.length;
+      
+      localStorage.setItem('pendingGuestLesson', JSON.stringify({
+        topicId: parseInt(topicId),
+        answers: allUserAnswers,
+        timeSpent,
+        completedAt: Date.now()
+      }));
+
+      setResult({
+        score: correctCount,
+        total: totalQuestions,
+        accuracy: (correctCount / totalQuestions * 100).toFixed(1),
+        xpGained: 0,
+        coinsGained: 0,
+        chest: { coins: 0, message: '' },
+        newXp: 0,
+        newCoins: 0,
+        newLevel: 1,
+        leveledUp: false,
+        isGuest: true
+      });
+      setCompleted(true);
+      completedRef.current = true;
+      submittingRef.current = false;
+      return;
+    }
+
     try {
       const response = await lessonsAPI.submit({
         topicId: parseInt(topicId),
@@ -228,35 +260,66 @@ const Lesson = () => {
               {resultMsg.text}
             </h2>
 
-            <div className="grid grid-cols-2 gap-3 my-6">
-              <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40">
-                <div className="text-3xl font-bold text-purple-600">{result.score}/{result.total}</div>
-                <div className="text-gray-600 mt-1 text-sm">Правильных</div>
-              </div>
-              
-              <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40">
-                <div className="text-3xl font-bold text-pink-600">{result.accuracy}%</div>
-                <div className="text-gray-600 mt-1 text-sm">Точность</div>
-              </div>
-
-              <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40">
-                <div className="text-3xl font-bold text-blue-600">+{result.xpGained}</div>
-                <div className="text-gray-600 mt-1 text-sm">Опыт</div>
-              </div>
-
-              <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40">
-                <div className="text-3xl font-bold text-yellow-600 flex items-center justify-center gap-2">
-                  <Coins size={24} />
-                  +{result.coinsGained || 0}
+            {result.isGuest ? (
+              <div className="my-6">
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40">
+                    <div className="text-3xl font-bold text-purple-600">{result.score}/{result.total}</div>
+                    <div className="text-gray-600 mt-1 text-sm">Правильных</div>
+                  </div>
+                  
+                  <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40">
+                    <div className="text-3xl font-bold text-pink-600">{result.accuracy}%</div>
+                    <div className="text-gray-600 mt-1 text-sm">Точность</div>
+                  </div>
                 </div>
-                <div className="text-gray-600 mt-1 text-sm">Монет</div>
-              </div>
 
-              <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40 col-span-2">
-                <div className="text-3xl font-bold text-green-600">{result.newLevel}</div>
-                <div className="text-gray-600 mt-1 text-sm">Уровень</div>
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6 rounded-2xl mb-6">
+                  <div className="text-2xl mb-2">💾</div>
+                  <div className="text-lg font-bold mb-2">Войди, чтобы сохранить результат!</div>
+                  <div className="text-sm opacity-90 mb-4">
+                    Получи опыт, монеты и сохрани свой прогресс
+                  </div>
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="bg-white text-purple-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition flex items-center gap-2 mx-auto"
+                  >
+                    <LogIn size={20} />
+                    Войти или зарегистрироваться
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 my-6">
+                <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40">
+                  <div className="text-3xl font-bold text-purple-600">{result.score}/{result.total}</div>
+                  <div className="text-gray-600 mt-1 text-sm">Правильных</div>
+                </div>
+                
+                <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40">
+                  <div className="text-3xl font-bold text-pink-600">{result.accuracy}%</div>
+                  <div className="text-gray-600 mt-1 text-sm">Точность</div>
+                </div>
+
+                <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40">
+                  <div className="text-3xl font-bold text-blue-600">+{result.xpGained}</div>
+                  <div className="text-gray-600 mt-1 text-sm">Опыт</div>
+                </div>
+
+                <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40">
+                  <div className="text-3xl font-bold text-yellow-600 flex items-center justify-center gap-2">
+                    <Coins size={24} />
+                    +{result.coinsGained || 0}
+                  </div>
+                  <div className="text-gray-600 mt-1 text-sm">Монет</div>
+                </div>
+
+                <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/40 col-span-2">
+                  <div className="text-3xl font-bold text-green-600">{result.newLevel}</div>
+                  <div className="text-gray-600 mt-1 text-sm">Уровень</div>
+                </div>
+              </div>
+            )}
 
             {result.leveledUp && (
               <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-4 mb-6 animate-pulse">

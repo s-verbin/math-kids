@@ -3,6 +3,14 @@ import db from '../models/database.js';
 export const getTopics = (req, res) => {
   const topics = db.prepare('SELECT * FROM topics ORDER BY order_index').all();
 
+  if (!req.userId) {
+    const topicsWithProgress = topics.map(topic => ({
+      ...topic,
+      progress: null
+    }));
+    return res.json(topicsWithProgress);
+  }
+
   const userProgress = db.prepare(`
     SELECT 
       topic_id,
@@ -38,6 +46,13 @@ export const getTopic = (req, res) => {
 
   if (!topic) {
     return res.status(404).json({ error: 'Тема не найдена' });
+  }
+
+  if (!req.userId) {
+    return res.json({
+      topic,
+      lessons: []
+    });
   }
 
   const userLessons = db.prepare(`

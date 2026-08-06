@@ -31,6 +31,7 @@ export const AuthProvider = ({ children }) => {
     const response = await authAPI.login({ username, password });
     localStorage.setItem('token', response.data.token);
     setUser(response.data.user);
+    await submitPendingGuestLesson();
     return response.data;
   };
 
@@ -38,7 +39,28 @@ export const AuthProvider = ({ children }) => {
     const response = await authAPI.register({ username, password, displayName, avatar, acceptedTerms });
     localStorage.setItem('token', response.data.token);
     setUser(response.data.user);
+    await submitPendingGuestLesson();
     return response.data;
+  };
+
+  const submitPendingGuestLesson = async () => {
+    try {
+      const pending = localStorage.getItem('pendingGuestLesson');
+      if (!pending) return;
+
+      const lessonData = JSON.parse(pending);
+      const { lessonsAPI } = await import('../services/api');
+      
+      await lessonsAPI.submit({
+        topicId: lessonData.topicId,
+        answers: lessonData.answers,
+        timeSpent: lessonData.timeSpent
+      });
+
+      localStorage.removeItem('pendingGuestLesson');
+    } catch (error) {
+      console.error('Error submitting pending guest lesson:', error);
+    }
   };
 
   const logout = () => {

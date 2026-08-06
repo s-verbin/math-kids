@@ -11,6 +11,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [showDaily, setShowDaily] = useState(user?.dailyReward > 0);
+  const [showGuestBanner, setShowGuestBanner] = useState(!user);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -84,7 +85,37 @@ const Home = () => {
     <>
       <Navbar />
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-20 sm:pb-8">
-        {showDaily && (
+        {!user && showGuestBanner && (
+          <div className="mb-4 sm:mb-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 sm:p-6 rounded-2xl shadow-lg relative">
+            <button
+              onClick={() => setShowGuestBanner(false)}
+              className="absolute top-2 right-2 text-white/80 hover:text-white text-2xl leading-none"
+            >
+              ×
+            </button>
+            <div className="text-3xl sm:text-4xl mb-2">👋</div>
+            <div className="text-lg sm:text-xl font-bold mb-2">Привет! Ты решаешь без аккаунта</div>
+            <div className="text-sm sm:text-base mb-4 opacity-90">
+              Чтобы сохранить прогресс, получать монеты и открыть ферму — войди или зарегистрируйся
+            </div>
+            <div className="flex gap-3 flex-wrap">
+              <button
+                onClick={() => navigate('/login')}
+                className="bg-white text-purple-600 px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold hover:bg-gray-100 transition flex items-center gap-2"
+              >
+                Войти
+              </button>
+              <button
+                onClick={() => navigate('/register')}
+                className="bg-purple-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold hover:bg-purple-800 transition flex items-center gap-2"
+              >
+                Регистрация
+              </button>
+            </div>
+          </div>
+        )}
+
+        {user && showDaily && (
           <div className="mb-4 sm:mb-6 bg-yellow-400/80 backdrop-blur-md text-white p-4 rounded-2xl shadow-lg text-center animate-pulse border border-white/40">
             <div className="text-3xl mb-1">🎁</div>
             <div className="text-lg font-bold">Ежедневная награда!</div>

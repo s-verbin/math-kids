@@ -17,23 +17,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/lesson/:topicId"
-            element={
-              <ProtectedRoute>
-                <Lesson />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/" element={<Home />} />
+          <Route path="/lesson/:topicId" element={<Lesson />} />
           
           <Route
             path="/profile"

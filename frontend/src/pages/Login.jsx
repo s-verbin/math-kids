@@ -84,13 +84,21 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="mt-4 sm:mt-6 text-center">
+        <div className="mt-4 sm:mt-6 text-center space-y-3">
           <p className="text-sm sm:text-base text-gray-600">
             Нет аккаунта?{' '}
             <Link to="/register" className="text-purple-600 font-semibold active:text-purple-700 touch-manipulation">
               Зарегистрируйся
             </Link>
           </p>
+          <div className="pt-3 border-t border-gray-200">
+            <Link
+              to="/"
+              className="text-sm sm:text-base text-gray-500 hover:text-gray-700 font-medium touch-manipulation"
+            >
+              Продолжить как гость →
+            </Link>
+          </div>
         </div>
 
         <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200 text-center">

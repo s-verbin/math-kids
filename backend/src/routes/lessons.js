@@ -4,7 +4,7 @@ import { authMiddleware } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.post('/start', authMiddleware, startLesson);
+router.post('/start', startLesson);
 router.post('/submit', authMiddleware, submitLesson);
 router.get('/leaderboard', authMiddleware, getLeaderboard);
 router.get('/achievements', authMiddleware, getAchievements);
