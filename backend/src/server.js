@@ -9,6 +9,7 @@ import farmRoutes from './routes/farm.js';
 import productionRoutes from './routes/production.js';
 import marketRoutes from './routes/market.js';
 import craftingRoutes from './routes/crafting.js';
+import questsRoutes from './routes/quests.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use('/api/farm', farmRoutes);
 app.use('/api/production', productionRoutes);
 app.use('/api/market', marketRoutes);
 app.use('/api/crafting', craftingRoutes);
+app.use('/api/quests', questsRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'MathKids API is running' });

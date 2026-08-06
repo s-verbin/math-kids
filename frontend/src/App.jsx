@@ -8,11 +8,13 @@ import Lesson from './pages/Lesson';
 import Profile from './pages/Profile';
 import Leaderboard from './pages/Leaderboard';
 import Farm from './pages/Farm';
+import Notifications from './components/Notifications';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
+        <Notifications />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

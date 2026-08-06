@@ -76,4 +76,10 @@ export const craftingAPI = {
   craftItem: (recipeId) => api.post('/crafting/craft', { recipeId }),
 };
 
+export const questsAPI = {
+  getDailyQuests: () => api.get('/quests/daily'),
+  updateProgress: (questType, increment) => api.post('/quests/progress', { questType, increment }),
+  claimReward: (questId) => api.post('/quests/claim', { questId }),
+};
+
 export default api;

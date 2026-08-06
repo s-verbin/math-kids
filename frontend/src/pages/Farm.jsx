@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import FarmScene from '../components/Farm3D/FarmScene';
 import Market from '../components/Market';
 import Crafting from '../components/Crafting';
+import DailyQuests from '../components/DailyQuests';
 
 const Farm = () => {
   const [myFarm, setMyFarm] = useState(null);
@@ -239,6 +240,11 @@ const Farm = () => {
           {/* My Farm Tab */}
           {activeTab === 'farm' && (
             <div>
+              {/* Daily Quests */}
+              <div className="mb-6">
+                <DailyQuests />
+              </div>
+
               {/* 3D Scene */}
               <div className="mb-6">
                 <div className="flex justify-between items-center mb-3">

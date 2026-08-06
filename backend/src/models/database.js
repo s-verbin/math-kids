@@ -233,6 +233,18 @@ dbWrapper.exec(`
     last_collected DATETIME,
     FOREIGN KEY (user_id) REFERENCES users(id)
   );
+
+  CREATE TABLE IF NOT EXISTS daily_quests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    quest_type TEXT NOT NULL,
+    target_value INTEGER NOT NULL,
+    current_value INTEGER DEFAULT 0,
+    reward_coins INTEGER NOT NULL,
+    completed INTEGER DEFAULT 0,
+    date DATE NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
 `);
 
 const topics = [
@@ -302,7 +314,15 @@ const achievements = [
   { name: 'Перфекционист', description: 'Получил 10/10 в 5 уроках', icon: '💎', condition_type: 'perfect_score', condition_value: 5 },
   { name: 'Пятитысячник', description: 'Решил 5000 примеров', icon: '🌟', condition_type: 'problems_solved', condition_value: 5000 },
   { name: 'Легенда', description: 'Достиг 20 уровня', icon: '👑', condition_type: 'level_reached', condition_value: 20 },
-  { name: 'Марафонец', description: 'Занимался 30 дней подряд', icon: '🏃', condition_type: 'streak_days', condition_value: 30 }
+  { name: 'Марафонец', description: 'Занимался 30 дней подряд', icon: '🏃', condition_type: 'streak_days', condition_value: 30 },
+  // Фермерские достижения
+  { name: 'Птицевод', description: 'Собрал 100 яиц', icon: '🥚', condition_type: 'resource_collected', condition_value: 100 },
+  { name: 'Молочник', description: 'Собрал 50 вёдер молока', icon: '🥛', condition_type: 'resource_collected', condition_value: 50 },
+  { name: 'Ткач', description: 'Собрал 20 клубков шерсти', icon: '🧶', condition_type: 'resource_collected', condition_value: 20 },
+  { name: 'Фермер-миллионер', description: 'Заработал 10000 монет на ферме', icon: '💰', condition_type: 'farm_coins_earned', condition_value: 10000 },
+  { name: 'Владелец стада', description: 'Купил 10 животных', icon: '🐄', condition_type: 'animals_purchased', condition_value: 10 },
+  { name: 'Мастер-повар', description: 'Скрафтил 50 предметов', icon: '👨‍🍳', condition_type: 'items_crafted', condition_value: 50 },
+  { name: 'Торговец', description: 'Продал ресурсов на 5000 монет', icon: '🏪', condition_type: 'resources_sold_value', condition_value: 5000 }
 ];
 
 const insertAchievement = dbWrapper.prepare(`
