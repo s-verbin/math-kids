@@ -106,11 +106,11 @@ export const checkAndUnlockFarmAchievements = (userId) => {
 
     let shouldUnlock = false;
 
-    if (conditionTypeToStat[achievement.condition_type]) {
-      const column = conditionTypeToStat[achievement.condition_type];
-      shouldUnlock = (userFarmStats[column] || 0) >= achievement.condition_value;
-    } else if (achievementNameToStat[achievement.name]) {
+    if (achievementNameToStat[achievement.name]) {
       const column = achievementNameToStat[achievement.name];
+      shouldUnlock = (userFarmStats[column] || 0) >= achievement.condition_value;
+    } else if (conditionTypeToStat[achievement.condition_type]) {
+      const column = conditionTypeToStat[achievement.condition_type];
       shouldUnlock = (userFarmStats[column] || 0) >= achievement.condition_value;
     } else if (achievement.condition_type === 'animals_purchased') {
       const count = db.prepare(`
