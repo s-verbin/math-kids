@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { farmAPI } from '../services/api';
-import { Coins, Heart, Utensils, ShoppingCart, Package, Box } from 'lucide-react';
+import { Coins, Heart, Utensils, ShoppingCart, Package, Box, Store, Hammer } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import FarmScene from '../components/Farm3D/FarmScene';
+import Market from '../components/Market';
+import Crafting from '../components/Crafting';
 
 const Farm = () => {
   const [myFarm, setMyFarm] = useState(null);
@@ -191,26 +193,46 @@ const Farm = () => {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
             <button
               onClick={() => setActiveTab('farm')}
-              className={`flex-1 py-3 px-4 rounded-lg font-semibold transition ${
+              className={`py-3 px-4 rounded-lg font-semibold transition ${
                 activeTab === 'farm'
                   ? 'bg-green-600 text-white'
                   : 'bg-white text-gray-600 hover:bg-gray-50'
               }`}
             >
-              🚜 Мой счетный двор
+              🚜 Ферма
             </button>
             <button
               onClick={() => setActiveTab('shop')}
-              className={`flex-1 py-3 px-4 rounded-lg font-semibold transition ${
+              className={`py-3 px-4 rounded-lg font-semibold transition ${
                 activeTab === 'shop'
                   ? 'bg-green-600 text-white'
                   : 'bg-white text-gray-600 hover:bg-gray-50'
               }`}
             >
               🛒 Магазин
+            </button>
+            <button
+              onClick={() => setActiveTab('market')}
+              className={`py-3 px-4 rounded-lg font-semibold transition ${
+                activeTab === 'market'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              🏪 Рынок
+            </button>
+            <button
+              onClick={() => setActiveTab('crafting')}
+              className={`py-3 px-4 rounded-lg font-semibold transition ${
+                activeTab === 'crafting'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              � Крафтинг
             </button>
           </div>
 
@@ -455,6 +477,16 @@ const Farm = () => {
                 >
                   🎀 Аксессуары
                 </button>
+                <button
+                  onClick={() => setShopCategory('upgrade')}
+                  className={`py-2 px-4 rounded-lg font-semibold whitespace-nowrap transition ${
+                    shopCategory === 'upgrade'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  ⚡ Улучшения
+                </button>
               </div>
 
               {/* Animals */}
@@ -505,6 +537,16 @@ const Farm = () => {
                 </div>
               )}
             </div>
+          )}
+
+          {/* Market Tab */}
+          {activeTab === 'market' && (
+            <Market onUpdate={loadData} />
+          )}
+
+          {/* Crafting Tab */}
+          {activeTab === 'crafting' && (
+            <Crafting onUpdate={loadData} />
           )}
         </div>
       </div>
