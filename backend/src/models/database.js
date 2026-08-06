@@ -215,6 +215,24 @@ dbWrapper.exec(`
     FOREIGN KEY (item_id) REFERENCES farm_items(id),
     FOREIGN KEY (equipped_on_animal_id) REFERENCES user_animals(id)
   );
+
+  CREATE TABLE IF NOT EXISTS animal_production (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_animal_id INTEGER NOT NULL,
+    resource_type TEXT NOT NULL,
+    ready_at DATETIME NOT NULL,
+    collected INTEGER DEFAULT 0,
+    FOREIGN KEY (user_animal_id) REFERENCES user_animals(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS user_resources (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    resource_type TEXT NOT NULL,
+    quantity INTEGER DEFAULT 0,
+    last_collected DATETIME,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
 `);
 
 const topics = [

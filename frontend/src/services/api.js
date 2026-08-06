@@ -60,4 +60,10 @@ export const farmAPI = {
   cleanPoop: () => api.post('/farm/clean-poop'),
 };
 
+export const productionAPI = {
+  getStatus: () => api.get('/production/status'),
+  collectResource: (userAnimalId) => api.post('/production/collect', { userAnimalId }),
+  getResources: () => api.get('/production/resources'),
+};
+
 export default api;
