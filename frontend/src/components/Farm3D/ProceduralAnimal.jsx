@@ -167,6 +167,8 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
   const isLyingRef = useRef(false);
   const lieTimeRef = useRef(0);
   const poopTimerRef = useRef(Math.random() * 60 + 60);
+  const stuckTimerRef = useRef(0);
+  const lastPosRef = useRef(new THREE.Vector3(position[0], position[1], position[2]));
   const baseY = position[1];
   const MIN_OBSTACLE_DIST = 1.8;
 
@@ -242,6 +244,21 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       return;
     }
 
+    // Проверка на застревание
+    const movedDist = posRef.current.distanceTo(lastPosRef.current);
+    if (movedDist < 0.01) {
+      stuckTimerRef.current += delta;
+      if (stuckTimerRef.current > 3) {
+        // Застряли на 3+ секунды - выбираем новую цель
+        targetRef.current = getNewTarget();
+        isMovingRef.current = true;
+        stuckTimerRef.current = 0;
+      }
+    } else {
+      stuckTimerRef.current = 0;
+      lastPosRef.current.copy(posRef.current);
+    }
+
     // Случайное движение
     const speed = 0.4;
     const dist = posRef.current.distanceTo(targetRef.current);
@@ -271,8 +288,9 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
           }
         }
         if (blocked) {
-          isMovingRef.current = false;
-          waitTimeRef.current = 0.3;
+          // Если заблокированы, сразу выбираем новую цель
+          targetRef.current = getNewTarget();
+          waitTimeRef.current = 0.1;
         } else {
           posRef.current.copy(nextPos);
           const angle = Math.atan2(direction.x, direction.z);
