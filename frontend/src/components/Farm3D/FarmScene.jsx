@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment, Html } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, Html } from '@react-three/drei';
 import { Suspense } from 'react';
 import * as THREE from 'three';
 import Ground from './Ground';
@@ -444,8 +444,9 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop }) =
             </Html>
           )}
 
-          {/* Окружение */}
-          <Environment preset="sunset" />
+          {/* Дополнительное освещение для объёма */}
+          <pointLight position={[-5, 5, -5]} intensity={0.3} color="#ffd4a3" />
+          <pointLight position={[5, 5, 5]} intensity={0.3} color="#a3c9ff" />
         </Suspense>
       </Canvas>
     </div>
