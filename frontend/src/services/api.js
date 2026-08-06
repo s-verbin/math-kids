@@ -66,4 +66,14 @@ export const productionAPI = {
   getResources: () => api.get('/production/resources'),
 };
 
+export const marketAPI = {
+  getPrices: () => api.get('/market/prices'),
+  sellResource: (resourceType, quantity) => api.post('/market/sell', { resourceType, quantity }),
+};
+
+export const craftingAPI = {
+  getRecipes: () => api.get('/crafting/recipes'),
+  craftItem: (recipeId) => api.post('/crafting/craft', { recipeId }),
+};
+
 export default api;
