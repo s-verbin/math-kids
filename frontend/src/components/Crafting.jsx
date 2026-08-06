@@ -40,6 +40,7 @@ const Crafting = ({ onUpdate }) => {
       
       alert(`✨ Создано: ${response.data.crafted}! +${response.data.value} 💰`);
       await loadData();
+      eventBus.emit(EVENTS.QUESTS_UPDATED);
       if (onUpdate) onUpdate();
     } catch (error) {
       console.error('Error crafting:', error);

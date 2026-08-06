@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Html } from '@react-three/drei';
 import { Suspense } from 'react';
@@ -297,6 +297,65 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop, onD
   }, [landCount, animalBounds]);
 
   const eatenRef = useRef(new Set());
+  const [productionStatus, setProductionStatus] = useState({});
+  const prevProductionRef = useRef({});
+  const onDataUpdateRef = useRef(onDataUpdate);
+
+  onDataUpdateRef.current = onDataUpdate;
+
+  const fetchProductionStatus = useCallback(async () => {
+    try {
+      const response = await productionAPI.getStatus();
+      const newStatus = Object.fromEntries(
+        (response.data.production || []).map(a => [a.animalId, a])
+      );
+      const unlockedAchievements = response.data.unlockedAchievements || [];
+      const autoCollected = [];
+
+      for (const [animalId, status] of Object.entries(newStatus)) {
+        const prev = prevProductionRef.current[animalId];
+        if (prev && prev.isReady && !status.isReady && status.timeRemaining > 0) {
+          autoCollected.push(status);
+        }
+      }
+
+      if (autoCollected.length > 0) {
+        let coinsEarned = 0;
+        autoCollected.forEach(status => {
+          eventBus.emit(EVENTS.RESOURCE_COLLECTED, {
+            type: status.resourceType,
+            value: status.value,
+            animalId: Number(animalId),
+            animalType: status.type
+          });
+          eventBus.emit(EVENTS.COINS_EARNED, { amount: status.value });
+          coinsEarned += status.value;
+        });
+        eventBus.emit(EVENTS.QUESTS_UPDATED);
+        onDataUpdateRef.current?.();
+      }
+
+      if (unlockedAchievements.length > 0) {
+        unlockedAchievements.forEach(achievement => {
+          eventBus.emit(EVENTS.ACHIEVEMENT_UNLOCKED, achievement);
+        });
+        if (autoCollected.length === 0) {
+          onDataUpdateRef.current?.();
+        }
+      }
+
+      prevProductionRef.current = newStatus;
+      setProductionStatus(newStatus);
+    } catch (error) {
+      console.error('Error fetching production status:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProductionStatus();
+    const interval = setInterval(fetchProductionStatus, 5000);
+    return () => clearInterval(interval);
+  }, [fetchProductionStatus]);
 
   const handleResourceCollect = async (resource) => {
     if (!resource) return;
@@ -323,6 +382,8 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop, onD
       if (onDataUpdate) {
         onDataUpdate();
       }
+      eventBus.emit(EVENTS.QUESTS_UPDATED);
+      await fetchProductionStatus();
     } catch (error) {
       console.error('Error collecting resource:', error);
     }
@@ -468,6 +529,7 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop, onD
                 onPoop={addPoop}
                 onClick={onPetAnimal ? (data) => onPetAnimal(data.id) : undefined}
                 onResourceCollect={handleResourceCollect}
+                production={productionStatus[animal.id]}
                 bounds={animalBounds}
               />
             );

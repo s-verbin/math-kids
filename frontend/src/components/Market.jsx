@@ -44,6 +44,7 @@ const Market = ({ onUpdate }) => {
       }
       
       await loadData();
+      eventBus.emit(EVENTS.QUESTS_UPDATED);
       if (onUpdate) onUpdate();
     } catch (error) {
       console.error('Error selling resource:', error);

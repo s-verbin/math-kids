@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { questsAPI } from '../services/api';
+import eventBus, { EVENTS } from '../services/EventBus';
 import { CheckCircle, Clock } from 'lucide-react';
 
 const DailyQuests = () => {
@@ -8,6 +9,8 @@ const DailyQuests = () => {
 
   useEffect(() => {
     loadQuests();
+    const unsubscribe = eventBus.on(EVENTS.QUESTS_UPDATED, loadQuests);
+    return () => unsubscribe();
   }, []);
 
   const loadQuests = async () => {

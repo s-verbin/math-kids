@@ -77,5 +77,6 @@ export const EVENTS = {
   
   // UI events
   NOTIFICATION_SHOW: 'notification:show',
-  ANIMATION_TRIGGER: 'animation:trigger'
+  ANIMATION_TRIGGER: 'animation:trigger',
+  QUESTS_UPDATED: 'quests:updated'
 };

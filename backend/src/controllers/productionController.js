@@ -176,7 +176,8 @@ export const getProductionStatus = (req, res) => {
       };
     });
 
-    res.json({ production: productionStatus });
+    const unlockedAchievements = checkAndUnlockFarmAchievements(req.userId);
+    res.json({ production: productionStatus, unlockedAchievements });
   } catch (error) {
     console.error('Error getting production status:', error);
     res.status(500).json({ error: 'Ошибка получения статуса производства' });

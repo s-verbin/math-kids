@@ -149,7 +149,7 @@ const ANIMAL_CONFIGS = {
   }
 };
 
-const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryData = null, plantPositions = [], eatenRef, obstacles = [], onPoop, onClick, onResourceCollect, bounds = FARM_BOUNDS }) => {
+const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryData = null, plantPositions = [], eatenRef, obstacles = [], onPoop, onClick, onResourceCollect, production = null, bounds = FARM_BOUNDS }) => {
   const groupRef = useRef();
   const bodyRef = useRef();
   const shadowRef = useRef();
@@ -800,8 +800,7 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
         <ProductionIndicator
           animalType={type}
           animalId={animalData.id}
-          happiness={animalData.happiness || 100}
-          hunger={animalData.hunger || 100}
+          production={production}
           position={[0, headY + 1.2, 0]}
           onCollect={onResourceCollect}
         />
