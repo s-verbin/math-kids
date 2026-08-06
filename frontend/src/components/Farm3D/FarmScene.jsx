@@ -300,8 +300,10 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop, onD
   const [productionStatus, setProductionStatus] = useState({});
   const prevProductionRef = useRef({});
   const onDataUpdateRef = useRef(onDataUpdate);
+  const animalsRef = useRef(animals);
 
   onDataUpdateRef.current = onDataUpdate;
+  animalsRef.current = animals;
 
   const fetchProductionStatus = useCallback(async () => {
     try {
@@ -320,16 +322,14 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop, onD
       }
 
       if (autoCollected.length > 0) {
-        let coinsEarned = 0;
         autoCollected.forEach(status => {
+          const animal = animalsRef.current.find(a => a.id === Number(animalId));
           eventBus.emit(EVENTS.RESOURCE_COLLECTED, {
             type: status.resourceType,
             value: status.value,
             animalId: Number(animalId),
-            animalType: status.type
+            animalType: animal?.type
           });
-          eventBus.emit(EVENTS.COINS_EARNED, { amount: status.value });
-          coinsEarned += status.value;
         });
         eventBus.emit(EVENTS.QUESTS_UPDATED);
         onDataUpdateRef.current?.();
@@ -376,6 +376,11 @@ const FarmScene = ({ animals = [], inventory = [], onPetAnimal, onCleanPoop, onD
         response.data.unlockedAchievements.forEach(achievement => {
           eventBus.emit(EVENTS.ACHIEVEMENT_UNLOCKED, achievement);
         });
+      }
+      
+      // Помечаем, чтобы следующий fetch не посчитал ручной сбор за авто-сбор
+      if (prevProductionRef.current[resource.animalId]) {
+        prevProductionRef.current[resource.animalId].isReady = false;
       }
       
       // Обновляем данные фермы
