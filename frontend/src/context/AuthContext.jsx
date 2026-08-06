@@ -22,6 +22,9 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data.user);
     } catch (error) {
       localStorage.removeItem('token');
+      if (error.response?.status === 401) {
+        console.log('Сессия истекла. Войдите заново.');
+      }
     } finally {
       setLoading(false);
     }
