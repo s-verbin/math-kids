@@ -131,7 +131,7 @@ const Market = ({ onUpdate }) => {
                       key={amount}
                       onClick={() => handleSell(type, Math.min(amount, quantity))}
                       disabled={quantity < amount || selling === type}
-                      className="btn btn-sm"
+                      className="btn-secondary text-sm py-2 px-3"
                     >
                       {selling === type ? '...' : `×${amount}`}
                     </button>
@@ -143,7 +143,7 @@ const Market = ({ onUpdate }) => {
                   <button
                     onClick={() => handleSell(type, quantity)}
                     disabled={selling === type}
-                    className="btn btn-primary w-full"
+                    className="btn-primary w-full"
                   >
                     {selling === type ? 'Продаём...' : `Продать всё (${quantity * price} 💰)`}
                   </button>

@@ -245,6 +245,18 @@ dbWrapper.exec(`
     date DATE NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
   );
+
+  CREATE TABLE IF NOT EXISTS user_farm_stats (
+    user_id INTEGER PRIMARY KEY,
+    eggs_collected INTEGER DEFAULT 0,
+    milk_collected INTEGER DEFAULT 0,
+    wool_collected INTEGER DEFAULT 0,
+    total_resources_collected INTEGER DEFAULT 0,
+    items_crafted INTEGER DEFAULT 0,
+    resources_sold_value INTEGER DEFAULT 0,
+    farm_coins_earned INTEGER DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
 `);
 
 const topics = [

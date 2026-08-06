@@ -1,4 +1,5 @@
 import db from '../models/database.js';
+import { updateDailyQuestProgress, incrementFarmStat, checkAndUnlockFarmAchievements } from '../utils/farmProgress.js';
 
 // Базовые цены ресурсов
 const BASE_PRICES = {
@@ -7,18 +8,31 @@ const BASE_PRICES = {
   wool: 25
 };
 
+// Deterministic pseudo-random in [0, 1)
+const hashSeed = (input) => {
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return ((h >>> 0) % 1000000) / 1000000;
+};
+
 // Генерация дневных цен с колебаниями
 const getDailyPrices = () => {
   const today = new Date().toISOString().split('T')[0];
-  const seed = today.split('-').reduce((a, b) => parseInt(a) + parseInt(b), 0);
-  
-  // Псевдослучайный множитель на основе даты
-  const random = (Math.sin(seed) * 10000) % 1;
-  
+
+  const getPrice = (resource) => {
+    const r = hashSeed(`${today}-${resource}`);
+    // r in [0, 1) -> multiplier in [0.8, 1.2]
+    const multiplier = 0.8 + r * 0.4;
+    return Math.round(BASE_PRICES[resource] * multiplier);
+  };
+
   return {
-    egg: Math.round(BASE_PRICES.egg * (0.8 + random * 0.4)), // 80-120% от базы
-    milk: Math.round(BASE_PRICES.milk * (0.8 + random * 0.4)),
-    wool: Math.round(BASE_PRICES.wool * (0.8 + random * 0.4)),
+    egg: getPrice('egg'),
+    milk: getPrice('milk'),
+    wool: getPrice('wool'),
     date: today
   };
 };
@@ -80,16 +94,23 @@ export const sellResource = (req, res) => {
       SET coins = coins + ?
       WHERE id = ?
     `).run(totalValue, req.userId);
-    
+
+    // Прогресс в фермерской статистике, квестах и достижениях
+    incrementFarmStat(req.userId, 'resources_sold_value', totalValue);
+    incrementFarmStat(req.userId, 'farm_coins_earned', totalValue);
+    updateDailyQuestProgress(req.userId, 'sell_resources', totalValue);
+
     const user = db.prepare('SELECT coins FROM users WHERE id = ?').get(req.userId);
-    
+    const unlocked = checkAndUnlockFarmAchievements(req.userId);
+
     res.json({
       success: true,
       sold: quantity,
       resourceType,
       pricePerUnit: price,
       totalEarned: totalValue,
-      newCoins: user.coins
+      newCoins: user.coins,
+      unlockedAchievements: unlocked
     });
   } catch (error) {
     console.error('Error selling resource:', error);

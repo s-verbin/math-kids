@@ -1,4 +1,5 @@
 import db from '../models/database.js';
+import { updateDailyQuestProgress, incrementFarmStat, checkAndUnlockFarmAchievements } from '../utils/farmProgress.js';
 
 // Рецепты крафтинга
 const RECIPES = {
@@ -112,14 +113,21 @@ export const craftItem = (req, res) => {
       SET coins = coins + ?
       WHERE id = ?
     `).run(recipe.value, req.userId);
-    
+
+    // Обновляем статистику, квесты и достижения
+    incrementFarmStat(req.userId, 'items_crafted', 1);
+    incrementFarmStat(req.userId, 'farm_coins_earned', recipe.value);
+    updateDailyQuestProgress(req.userId, 'craft_items', 1);
+
     const user = db.prepare('SELECT coins FROM users WHERE id = ?').get(req.userId);
-    
+    const unlocked = checkAndUnlockFarmAchievements(req.userId);
+
     res.json({
       success: true,
       crafted: recipe.name,
       value: recipe.value,
-      newCoins: user.coins
+      newCoins: user.coins,
+      unlockedAchievements: unlocked
     });
   } catch (error) {
     console.error('Error crafting item:', error);

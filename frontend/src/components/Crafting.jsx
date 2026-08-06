@@ -137,7 +137,7 @@ const Crafting = ({ onUpdate }) => {
             <button
               onClick={() => handleCraft(recipe.id)}
               disabled={!recipe.canCraft || crafting === recipe.id}
-              className={`btn w-full ${recipe.canCraft ? 'btn-primary' : 'btn-disabled'}`}
+              className={`w-full ${recipe.canCraft ? 'btn-primary' : 'btn-secondary opacity-60 cursor-not-allowed'}`}
             >
               {crafting === recipe.id ? (
                 'Создаём...'
