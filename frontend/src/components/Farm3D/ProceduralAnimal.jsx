@@ -13,27 +13,29 @@ const ANIMAL_CONFIGS = {
     color: '#ffb6c1',
     bodyColor: '#ffb6c1',
     darkColor: '#e8a5a5',
-    snoutColor: '#ff9999',
-    size: 0.8,
-    bodyScale: [1.05, 0.85, 1.25],
-    headSize: 0.38,
+    snoutColor: '#ff8093',
+    size: 0.85,
+    bodyScale: [1.1, 0.95, 1.2], // Пухлое, кругленькое тело
+    headSize: 0.42,
+    headZ: 0.7,
     ears: 'pointed',
     tail: 'curly',
     legs: 4,
-    neck: 0.1
+    neck: 0.05
   },
   chicken: {
-    color: '#fff8dc',
-    bodyColor: '#fff8dc',
-    darkColor: '#f0e68c',
-    snoutColor: '#ff6b35',
-    size: 0.36,
-    bodyScale: [0.65, 0.85, 0.85],
-    headSize: 0.18,
+    color: '#ffffff', // Яркий белый
+    bodyColor: '#ffffff',
+    darkColor: '#ffd700', // Желтые крылышки
+    snoutColor: '#ff4500', // Яркий оранжевый клюв
+    size: 0.45,
+    bodyScale: [0.8, 0.9, 0.85], // Шарообразное туловище
+    headSize: 0.28,
+    headZ: 0.4,
     ears: 'comb',
     tail: 'feathers',
     legs: 2,
-    neck: 0.22,
+    neck: 0.15,
     wings: true
   },
   cow: {
@@ -44,7 +46,7 @@ const ANIMAL_CONFIGS = {
     size: 1.1,
     bodyScale: [0.95, 0.85, 1.35],
     headSize: 0.45,
-    headZ: 1.2,
+    headZ: 0.8,
     ears: 'flat',
     tail: 'thin',
     legs: 4,
@@ -55,99 +57,106 @@ const ANIMAL_CONFIGS = {
   },
   horse: {
     color: '#8b4513',
-    bodyColor: '#8b4513',
-    darkColor: '#5c2e0c',
-    snoutColor: '#3d3d3d',
-    size: 1.23,
-    bodyScale: [1.15, 1.2, 1.7],
-    headSize: 0.5,
-    ears: 'long',
+    bodyColor: '#964b00',
+    darkColor: '#3a1e05', // Темная грива
+    snoutColor: '#2b1d0c', // Темная морда
+    size: 1.15,
+    bodyScale: [0.85, 0.9, 1.4], // Вытянутое стройное тело
+    headSize: 0.4,
+    headZ: 0.85,
+    ears: 'pointed',
     tail: 'hair',
     legs: 4,
-    neck: 0.4
+    neck: 0.45
   },
   sheep: {
     color: '#fffaf0',
-    bodyColor: '#fffaf0',
-    darkColor: '#e6e0d4',
-    snoutColor: '#333333',
-    size: 0.75,
-    bodyScale: [1.25, 1.0, 1.25],
-    headSize: 0.32,
+    bodyColor: '#f7f0e3',
+    darkColor: '#3d3d3d', // Черные ножки и мордочка (как у суффолкских овец)
+    snoutColor: '#2b2b2b',
+    size: 0.8,
+    bodyScale: [1.2, 1.1, 1.3],
+    headSize: 0.35,
+    headZ: 0.7,
     ears: 'flat',
     tail: 'small',
     legs: 4,
-    neck: 0.15,
+    neck: 0.1,
     fluffy: true,
     wool: true
   },
   duck: {
-    color: '#fff8dc',
-    bodyColor: '#fff8dc',
-    darkColor: '#90ee90',
-    snoutColor: '#ff6b35',
-    size: 0.32,
-    bodyScale: [0.6, 0.7, 0.9],
-    headSize: 0.16,
+    color: '#ffdb58', // Уточка должна быть ярко-желтой!
+    bodyColor: '#ffdb58',
+    darkColor: '#f0c040',
+    snoutColor: '#ff5722', // Оранжевый плоский клюв
+    size: 0.4,
+    bodyScale: [0.75, 0.8, 0.9],
+    headSize: 0.25,
+    headZ: 0.45,
     ears: 'none',
     tail: 'feathers',
     legs: 2,
-    neck: 0.18,
+    neck: 0.12,
     wings: true
   },
   dog: {
-    color: '#d2691e',
-    bodyColor: '#d2691e',
+    color: '#e08b42',
+    bodyColor: '#e08b42',
     darkColor: '#8b4513',
-    snoutColor: '#333333',
-    size: 0.71,
-    bodyScale: [1.0, 0.9, 1.3],
-    headSize: 0.35,
-    ears: 'floppy',
+    snoutColor: '#1a1a1a', // Черный носик
+    size: 0.75,
+    bodyScale: [0.85, 0.85, 1.15],
+    headSize: 0.38,
+    headZ: 0.65,
+    ears: 'floppy', // Висячие милые ушки
     tail: 'curly',
     legs: 4,
-    neck: 0.22
+    neck: 0.15
   },
   cat: {
-    color: '#ff8c00',
-    bodyColor: '#ff8c00',
-    darkColor: '#cc7000',
-    snoutColor: '#ff9999',
-    size: 0.49,
-    bodyScale: [0.85, 0.75, 1.15],
-    headSize: 0.28,
+    color: '#ff9d3b', // Рыжий котик
+    bodyColor: '#ff9d3b',
+    darkColor: '#e07b12',
+    snoutColor: '#ffb6c1', // Розовый носик
+    size: 0.55,
+    bodyScale: [0.75, 0.75, 1.0],
+    headSize: 0.32,
+    headZ: 0.5,
     ears: 'pointed',
     tail: 'long',
     legs: 4,
-    neck: 0.2
+    neck: 0.1
   },
   goat: {
     color: '#f5deb3',
     bodyColor: '#f5deb3',
-    darkColor: '#d2b48c',
-    snoutColor: '#ff9999',
-    size: 0.58,
-    bodyScale: [1.0, 1.0, 1.25],
-    headSize: 0.34,
+    darkColor: '#8b7355',
+    snoutColor: '#e6c280',
+    size: 0.7,
+    bodyScale: [0.8, 0.85, 1.1],
+    headSize: 0.33,
+    headZ: 0.6,
     ears: 'flat',
     tail: 'short',
     legs: 4,
-    neck: 0.25,
+    neck: 0.3,
     horns: true,
     beard: true
   },
   donkey: {
-    color: '#a9a9a9',
-    bodyColor: '#a9a9a9',
-    darkColor: '#696969',
-    snoutColor: '#4a4a4a',
-    size: 0.94,
-    bodyScale: [1.05, 1.1, 1.45],
-    headSize: 0.4,
+    color: '#9e9e9e',
+    bodyColor: '#9e9e9e',
+    darkColor: '#424242',
+    snoutColor: '#e0e0e0', // Белая мордочка, как у настоящих осликов
+    size: 0.95,
+    bodyScale: [0.85, 0.9, 1.25],
+    headSize: 0.38,
+    headZ: 0.75,
     ears: 'long',
     tail: 'hair',
     legs: 4,
-    neck: 0.3
+    neck: 0.35
   }
 };
 
@@ -178,7 +187,7 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
   const type = animalData?.type || 'pig';
   const config = ANIMAL_CONFIGS[type] || ANIMAL_CONFIGS.pig;
   const headY = config.size * (1.3 + config.neck);
-  const headZ = config.size * (config.headZ || 0.65);
+  const headZ = config.size * ((config.headZ || 0.65) + config.bodyScale[2] / 2);
   const labelFontSize = Math.max(10, Math.round(12 + config.size * 4));
 
   const lerp = (a, b, t) => a + (b - a) * t;
@@ -431,22 +440,38 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
   // Шерсть для овец (оптимизировано)
   const wool = config.wool && useMemo(() => {
     const woolBalls = [];
-    for (let i = 0; i < 15; i++) { // уменьшено с 25 до 15
+    const count = 24; // Увеличили количество шариков
+    
+    for (let i = 0; i < count; i++) {
       const theta = Math.random() * Math.PI * 2;
-      const phi = Math.random() * Math.PI;
-      const r = config.size * 0.85;
-      const x = r * Math.sin(phi) * Math.cos(theta);
-      const y = config.size + r * Math.cos(phi) * 0.6;
-      const z = r * Math.sin(phi) * Math.sin(theta);
-      const size = 0.1 + Math.random() * 0.08; // крупнее
+      const phi = (Math.random() * 0.8 + 0.1) * Math.PI; // Покрываем спину и бока
+      
+      // Учитываем bodyScale, чтобы шерсть облегала форму туловища и выходила НАРУЖУ
+      const scaleX = config.bodyScale[0];
+      const scaleY = config.bodyScale[1];
+      const scaleZ = config.bodyScale[2];
+      
+      const r = config.size * 1.05; // Радиус БОЛЬШЕ размера тела (чтобы шерсть торчала)
+      
+      const x = r * Math.sin(phi) * Math.cos(theta) * scaleX;
+      const y = config.size * 1.1 + r * Math.cos(phi) * 0.8 * scaleY;
+      const z = r * Math.sin(phi) * Math.sin(theta) * scaleZ;
+      
+      const ballSize = config.size * (0.22 + Math.random() * 0.1); // Сферы стали в 2 раза крупнее!
+
       woolBalls.push(
         <mesh
           key={`wool-${i}`}
           ref={el => furRefs.current[i] = el}
           position={[x, y, z]}
+          castShadow
         >
-          <sphereGeometry args={[size, 4, 4]} />
-          <meshStandardMaterial color={color} roughness={1} />
+          <sphereGeometry args={[ballSize, 8, 8]} />
+          <meshStandardMaterial 
+            color={color} 
+            roughness={0.9} 
+            metalness={0.0}
+          />
         </mesh>
       );
     }
@@ -617,10 +642,10 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
             <meshStandardMaterial color={color} />
           </mesh>
         );
-      case 'long':
+      case 'long': // Для кошек
         return (
-          <mesh castShadow position={[0, config.size * 0.8, -config.size * 0.9]} rotation={[0.5, 0, 0]}>
-            <capsuleGeometry args={[0.05, 0.4, 4, 8]} />
+          <mesh castShadow position={[0, config.size * 0.9, -config.size * 0.8]} rotation={[-0.8, 0, 0]}>
+            <cylinderGeometry args={[0.03, 0.04, config.size * 0.9, 8]} />
             <meshStandardMaterial color={color} />
           </mesh>
         );
@@ -677,17 +702,20 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
           <cylinderGeometry args={[0.08, 0.06, config.size * 0.5, 8]} />
           <meshStandardMaterial color={config.darkColor} />
         </mesh>
-        {config.legs === 2 ? (
-          <mesh castShadow position={[0, 0.02, 0]}>
-            <cylinderGeometry args={[0.12, 0.1, 0.05, 8]} />
-            <meshStandardMaterial color={config.snoutColor} />
-          </mesh>
-        ) : (
-          <mesh castShadow position={[0, 0.02, 0]}>
-            <boxGeometry args={[0.1, 0.04, 0.12]} />
-            <meshStandardMaterial color="#3d3d3d" />
-          </mesh>
-        )}
+        {/* Копытца / Лапки */}
+        <mesh castShadow position={[0, 0.02, 0]}>
+          {config.legs === 2 ? (
+            // Птичьи лапки (перепончатые или трехпалые)
+            <boxGeometry args={[0.18, 0.02, 0.22]} />
+          ) : ['cat', 'dog'].includes(type) ? (
+            // Круглые мягкие лапки
+            <sphereGeometry args={[0.09, 8, 8]} />
+          ) : (
+            // Копыта
+            <boxGeometry args={[0.1, 0.06, 0.12]} />
+          )}
+          <meshStandardMaterial color={['cat', 'dog'].includes(type) ? config.bodyColor : config.darkColor} />
+        </mesh>
       </group>
     );
   }
@@ -740,32 +768,46 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
         </mesh>
       )}
 
-      {/* Пятачок/клюв/мордочка */}
+      {/* МОРДОЧКИ И КЛЮВЫ */}
       <mesh castShadow position={[
         0, 
-        type === 'cow' ? headY - 0.1 : config.size * (1.25 + config.neck), 
-        headZ + (type === 'cow' ? config.headSize * 0.7 : config.headSize * 0.6)
+        ['chicken', 'duck'].includes(type) ? headY - 0.05 : type === 'cow' ? headY - 0.1 : config.size * (1.2 + config.neck), 
+        headZ + config.headSize * 0.6
       ]}>
-        {['chicken', 'duck'].includes(type) ? (
-          <coneGeometry args={[0.08, 0.15, 8]} rotation={[Math.PI / 2, 0, 0]} />
+        {type === 'duck' ? (
+          // Утка: плоский широкий клюв
+          <boxGeometry args={[0.2, 0.05, 0.25]} />
+        ) : type === 'chicken' ? (
+          // Курица: конусообразный клюв
+          <coneGeometry args={[0.07, 0.15, 8]} rotation={[Math.PI / 2, 0, 0]} />
+        ) : type === 'pig' ? (
+          // Свинья: круглый пятак с двумя ноздрями
+          <cylinderGeometry args={[0.14, 0.14, 0.08, 16]} rotation={[Math.PI / 2, 0, 0]} />
         ) : type === 'cow' ? (
-          // Для коровы делаем аккуратный розовый параллелепипед мордочки
-          <boxGeometry args={[config.headSize * 0.8, config.headSize * 0.5, config.headSize * 0.5]} />
+          // Корова: розовая коробочка-мордочка
+          <boxGeometry args={[config.headSize * 0.75, config.headSize * 0.45, config.headSize * 0.45]} />
         ) : (
-          <cylinderGeometry args={[config.headSize * 0.3, config.headSize * 0.3, 0.08, 16]} />
+          // Собаки, кошки, лошади: аккуратный овальный носик
+          <sphereGeometry args={[config.headSize * 0.35, 12, 12]} />
         )}
         <meshStandardMaterial color={config.snoutColor} />
       </mesh>
 
-      {/* Глаза */}
-      <mesh castShadow position={[-config.headSize * 0.3, config.size * (1.45 + config.neck), headZ - config.headSize * 0.2]}>
-        <sphereGeometry args={[0.05, 8, 8]} />
-        <meshStandardMaterial color="#000000" />
-      </mesh>
-      <mesh castShadow position={[config.headSize * 0.3, config.size * (1.45 + config.neck), headZ - config.headSize * 0.2]}>
-        <sphereGeometry args={[0.05, 8, 8]} />
-        <meshStandardMaterial color="#000000" />
-      </mesh>
+      {/* ГЛАЗА С БЛИКАМИ */}
+      {[-1, 1].map((side, i) => (
+        <group key={i} position={[side * config.headSize * 0.32, headY + 0.05, headZ + config.headSize * 0.45]}>
+          {/* Черный зрачок */}
+          <mesh castShadow>
+            <sphereGeometry args={[0.05, 8, 8]} />
+            <meshStandardMaterial color="#000000" />
+          </mesh>
+          {/* Белый блик */}
+          <mesh position={[side * 0.015, 0.02, 0.035]}>
+            <sphereGeometry args={[0.018, 6, 6]} />
+            <meshStandardMaterial color="#ffffff" emissive="#ffffff" />
+          </mesh>
+        </group>
+      ))}
 
       {renderEars()}
       {horns}
