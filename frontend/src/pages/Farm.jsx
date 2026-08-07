@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { farmAPI } from '../services/api';
 import { Coins, Heart, Utensils, ShoppingCart, Package, Box, Store, Hammer } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import eventBus, { EVENTS } from '../services/EventBus';
 import FarmScene from '../components/Farm3D/FarmScene';
 import Market from '../components/Market';
 import Crafting from '../components/Crafting';
@@ -61,6 +62,7 @@ const Farm = () => {
     try {
       await farmAPI.feedAnimal(userAnimalId);
       await loadData();
+      eventBus.emit(EVENTS.QUESTS_UPDATED);
     } catch (error) {
       alert(error.response?.data?.error || 'Ошибка кормления');
     }
@@ -70,6 +72,7 @@ const Farm = () => {
     try {
       await farmAPI.petAnimal(userAnimalId);
       await loadData();
+      eventBus.emit(EVENTS.QUESTS_UPDATED);
     } catch (error) {
       alert(error.response?.data?.error || 'Ошибка');
     }

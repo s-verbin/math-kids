@@ -1,4 +1,6 @@
 import db from '../models/database.js';
+import { updateDailyQuestProgress, checkAndUnlockFarmAchievements } from '../utils/farmProgress.js';
+import { calculateProductionTime, getUserUpgrades, PRODUCTION_CONFIG } from './productionController.js';
 
 export const getShop = (req, res) => {
   const animals = db.prepare('SELECT * FROM farm_animals ORDER BY price').all();
@@ -74,13 +76,26 @@ export const buyAnimal = (req, res) => {
   db.prepare('UPDATE users SET coins = coins - ? WHERE id = ?').run(animal.price, req.userId);
   
   const result = db.prepare(`
-    INSERT INTO user_animals (user_id, animal_id, name)
-    VALUES (?, ?, ?)
+  INSERT INTO user_animals (user_id, animal_id, name)
+  VALUES (?, ?, ?)
   `).run(req.userId, animalId, name || animal.name);
-  
+
+  const userAnimalId = result.lastInsertRowid;
+  const now = new Date();
+  const upgrades = getUserUpgrades(req.userId);
+  const prodConfig = PRODUCTION_CONFIG[animal.type];
+  if (prodConfig) {
+    const adjustedTime = calculateProductionTime(animal.type, prodConfig.productionTime, 100, 100, upgrades);
+    const readyAt = new Date(now.getTime() + adjustedTime * 1000);
+    db.prepare(`
+      INSERT INTO animal_production (user_animal_id, resource_type, ready_at, collected)
+      VALUES (?, ?, ?, 0)
+    `).run(userAnimalId, prodConfig.resourceType, readyAt.toISOString());
+  }
+
   res.json({
     success: true,
-    userAnimalId: result.lastInsertRowid,
+    userAnimalId,
     newCoins: user.coins - animal.price
   });
 };
@@ -138,12 +153,15 @@ export const feedAnimal = (req, res) => {
   }
   
   db.prepare(`
-    UPDATE user_animals 
-    SET hunger = 100, last_fed = CURRENT_TIMESTAMP
-    WHERE id = ?
+  UPDATE user_animals 
+  SET hunger = 100, last_fed = CURRENT_TIMESTAMP
+  WHERE id = ?
   `).run(userAnimalId);
-  
-  res.json({ success: true, message: 'Животное накормлено!' });
+
+  updateDailyQuestProgress(req.userId, 'feed_animals', 1);
+  const unlocked = checkAndUnlockFarmAchievements(req.userId);
+
+  res.json({ success: true, message: 'Животное накормлено!', unlockedAchievements: unlocked });
 };
 
 export const petAnimal = (req, res) => {
@@ -158,12 +176,15 @@ export const petAnimal = (req, res) => {
   }
   
   db.prepare(`
-    UPDATE user_animals 
-    SET happiness = 100, last_petted = CURRENT_TIMESTAMP
-    WHERE id = ?
+  UPDATE user_animals 
+  SET happiness = 100, last_petted = CURRENT_TIMESTAMP
+  WHERE id = ?
   `).run(userAnimalId);
-  
-  res.json({ success: true, message: 'Животное довольно!' });
+
+  updateDailyQuestProgress(req.userId, 'pet_animals', 1);
+  const unlocked = checkAndUnlockFarmAchievements(req.userId);
+
+  res.json({ success: true, message: 'Животное довольно!', unlockedAchievements: unlocked });
 };
 
 export const sellAnimal = (req, res) => {

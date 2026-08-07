@@ -41,15 +41,18 @@ const ANIMAL_CONFIGS = {
     bodyColor: '#f5f5f5',
     darkColor: '#333333',
     snoutColor: '#ff9999',
-    size: 1.3,
-    bodyScale: [1.4, 1.1, 1.8],
-    headSize: 0.55,
+    size: 1.2,
+    bodyScale: [1.2, 1.0, 1.5],
+    headSize: 0.65,
+    headZ: 1.7,
     ears: 'flat',
     tail: 'thin',
     legs: 4,
     neck: 0.2,
+    horns: true,
     spots: true,
-    udder: true
+    udder: true,
+    bodyGeometry: 'box'
   },
   horse: {
     color: '#8b4513',
@@ -176,6 +179,7 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
   const type = animalData?.type || 'pig';
   const config = ANIMAL_CONFIGS[type] || ANIMAL_CONFIGS.pig;
   const headY = config.size * (1.3 + config.neck);
+  const headZ = config.size * (config.headZ || 0.65);
   const labelFontSize = Math.max(10, Math.round(12 + config.size * 4));
 
   const lerp = (a, b, t) => a + (b - a) * t;
@@ -459,11 +463,11 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       case 'pointed':
         return (
           <>
-            <mesh castShadow position={[-0.22, config.headSize * 1.5, 0]} rotation={[0, 0, -0.5]}>
+            <mesh castShadow position={[-config.headSize * 0.6, headY + config.headSize * 0.8, headZ]}>
               <coneGeometry args={[0.1, 0.25, 8]} />
               <meshStandardMaterial color={earColor} />
             </mesh>
-            <mesh castShadow position={[0.22, config.headSize * 1.5, 0]} rotation={[0, 0, 0.5]}>
+            <mesh castShadow position={[config.headSize * 0.6, headY + config.headSize * 0.8, headZ]}>
               <coneGeometry args={[0.1, 0.25, 8]} />
               <meshStandardMaterial color={earColor} />
             </mesh>
@@ -472,11 +476,11 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       case 'floppy':
         return (
           <>
-            <mesh castShadow position={[-0.25, config.headSize * 1.2, -0.05]} rotation={[0, 0, -0.8]}>
+            <mesh castShadow position={[-config.headSize * 0.6, headY + config.headSize * 0.4, headZ - 0.05]} rotation={[0, 0, -0.8]}>
               <capsuleGeometry args={[0.08, 0.2, 4, 8]} />
               <meshStandardMaterial color={earColor} />
             </mesh>
-            <mesh castShadow position={[0.25, config.headSize * 1.2, -0.05]} rotation={[0, 0, 0.8]}>
+            <mesh castShadow position={[config.headSize * 0.6, headY + config.headSize * 0.4, headZ - 0.05]} rotation={[0, 0, 0.8]}>
               <capsuleGeometry args={[0.08, 0.2, 4, 8]} />
               <meshStandardMaterial color={earColor} />
             </mesh>
@@ -485,11 +489,11 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       case 'long':
         return (
           <>
-            <mesh castShadow position={[-0.18, config.headSize * 1.4, 0]} rotation={[0, 0, -0.2]}>
+            <mesh castShadow position={[-config.headSize * 0.5, headY + config.headSize * 0.9, headZ]} rotation={[0, 0, -0.2]}>
               <capsuleGeometry args={[0.06, 0.4, 4, 8]} />
               <meshStandardMaterial color={earColor} />
             </mesh>
-            <mesh castShadow position={[0.18, config.headSize * 1.4, 0]} rotation={[0, 0, 0.2]}>
+            <mesh castShadow position={[config.headSize * 0.5, headY + config.headSize * 0.9, headZ]} rotation={[0, 0, 0.2]}>
               <capsuleGeometry args={[0.06, 0.4, 4, 8]} />
               <meshStandardMaterial color={earColor} />
             </mesh>
@@ -498,11 +502,11 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       case 'flat':
         return (
           <>
-            <mesh castShadow position={[-0.28, config.headSize * 1.1, 0]} rotation={[0, 0, 0]}>
+            <mesh castShadow position={[-config.headSize * 0.5, headY + config.headSize * 0.2, headZ]} rotation={[0, 0, 0]}>
               <cylinderGeometry args={[0.12, 0.1, 0.05, 8]} rotation={[0, 0, Math.PI / 2]} />
               <meshStandardMaterial color={earColor} />
             </mesh>
-            <mesh castShadow position={[0.28, config.headSize * 1.1, 0]} rotation={[0, 0, 0]}>
+            <mesh castShadow position={[config.headSize * 0.5, headY + config.headSize * 0.2, headZ]} rotation={[0, 0, 0]}>
               <cylinderGeometry args={[0.12, 0.1, 0.05, 8]} rotation={[0, 0, Math.PI / 2]} />
               <meshStandardMaterial color={earColor} />
             </mesh>
@@ -510,7 +514,7 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
         );
       case 'comb':
         return (
-          <mesh castShadow position={[0, config.headSize * 1.5, -0.05]}>
+          <mesh castShadow position={[0, headY + config.headSize * 0.9, headZ]}>
             <boxGeometry args={[0.1, 0.2, 0.05]} />
             <meshStandardMaterial color="#ff0000" />
           </mesh>
@@ -523,11 +527,11 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
   // Рога
   const horns = config.horns && (
     <>
-      <mesh castShadow position={[-0.12, config.headSize * 1.6, -0.05]} rotation={[0, 0, -0.5]}>
+      <mesh castShadow position={[-config.headSize * 0.35, headY + config.headSize * 0.9, headZ - config.headSize * 0.1]} rotation={[0, 0, -0.5]}>
         <coneGeometry args={[0.04, 0.2, 8]} />
         <meshStandardMaterial color="#8b7355" />
       </mesh>
-      <mesh castShadow position={[0.12, config.headSize * 1.6, -0.05]} rotation={[0, 0, 0.5]}>
+      <mesh castShadow position={[config.headSize * 0.35, headY + config.headSize * 0.9, headZ - config.headSize * 0.1]} rotation={[0, 0, 0.5]}>
         <coneGeometry args={[0.04, 0.2, 8]} />
         <meshStandardMaterial color="#8b7355" />
       </mesh>
@@ -574,7 +578,7 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
   );
 
   const beard = config.beard && (
-    <mesh castShadow position={[0, config.size * (1.05 + config.neck), config.size * (0.65 + config.headSize * 0.45)]}>
+    <mesh castShadow position={[0, config.size * (1.05 + config.neck), headZ + config.headSize * 0.45]}>
       <coneGeometry args={[0.05, 0.12, 8]} rotation={[Math.PI / 2, 0, 0]} />
       <meshStandardMaterial color='#d2b48c' />
     </mesh>
@@ -639,6 +643,13 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
             <meshStandardMaterial color={config.darkColor} />
           </mesh>
         );
+      case 'thin':
+        return (
+          <mesh castShadow position={[0, config.size * 0.7, -config.size * 0.9]} rotation={[0.2, 0, 0]}>
+            <boxGeometry args={[0.05, 0.6, 0.05]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+        );
       default:
         return null;
     }
@@ -693,7 +704,11 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
 
       {/* Тело */}
       <mesh ref={bodyRef} castShadow position={[0, config.size * 1.1, 0]} scale={config.bodyScale}>
-        <sphereGeometry args={[config.size, 16, 16]} />
+        {config.bodyGeometry === 'box' ? (
+          <boxGeometry args={[config.size * 2, config.size * 2, config.size * 2]} />
+        ) : (
+          <sphereGeometry args={[config.size, 16, 16]} />
+        )}
         <meshStandardMaterial
           color={color}
           roughness={0.7}
@@ -708,21 +723,21 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       {spots}
 
       {/* Голова */}
-      <mesh castShadow position={[0, config.size * (1.3 + config.neck), config.size * 0.65]}>
+      <mesh castShadow position={[0, headY, headZ]}>
         <sphereGeometry args={[config.headSize, 16, 16]} />
         <meshStandardMaterial color={color} roughness={0.7} metalness={0.1} />
       </mesh>
 
       {/* Шея для птиц/лошадей */}
       {config.neck > 0.2 && (
-        <mesh castShadow position={[0, config.size * (1.1 + config.neck / 2), config.size * 0.4]}>
+        <mesh castShadow position={[0, config.size * (1.1 + config.neck / 2), headZ - config.headSize * 0.6]}>
           <cylinderGeometry args={[config.headSize * 0.6, config.headSize * 0.6, config.size * 0.4, 8]} />
           <meshStandardMaterial color={color} roughness={0.7} />
         </mesh>
       )}
 
       {/* Пятачок/клюв */}
-      <mesh castShadow position={[0, config.size * (1.25 + config.neck), config.size * (0.65 + config.headSize * 0.6)]}>
+      <mesh castShadow position={[0, config.size * (1.25 + config.neck), headZ + config.headSize * 0.6]}>
         {['chicken', 'duck'].includes(type) ? (
           <coneGeometry args={[0.08, 0.15, 8]} rotation={[Math.PI / 2, 0, 0]} />
         ) : (
@@ -732,11 +747,11 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       </mesh>
 
       {/* Глаза */}
-      <mesh castShadow position={[-config.headSize * 0.3, config.size * (1.45 + config.neck), config.size * 0.55]}>
+      <mesh castShadow position={[-config.headSize * 0.3, config.size * (1.45 + config.neck), headZ - config.headSize * 0.2]}>
         <sphereGeometry args={[0.05, 8, 8]} />
         <meshStandardMaterial color="#000000" />
       </mesh>
-      <mesh castShadow position={[config.headSize * 0.3, config.size * (1.45 + config.neck), config.size * 0.55]}>
+      <mesh castShadow position={[config.headSize * 0.3, config.size * (1.45 + config.neck), headZ - config.headSize * 0.2]}>
         <sphereGeometry args={[0.05, 8, 8]} />
         <meshStandardMaterial color="#000000" />
       </mesh>

@@ -3,7 +3,6 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import Birds from './background/Birds';
 import Butterflies from './background/Butterflies';
-import DayNightCycle from './background/DayNightCycle';
 
 const Background = () => {
   const { scene } = useThree();
@@ -86,8 +85,7 @@ const Background = () => {
         <meshStandardMaterial color='#C5E1A5' roughness={1} />
       </mesh>
 
-      {/* Система день/ночь */}
-      <DayNightCycle cycleDuration={600} />
+      {/* Система день/ночь — отключена, слишком красная */}
 
       {/* Птицы на фоне */}
       <Birds count={7} />

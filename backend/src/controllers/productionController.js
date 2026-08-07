@@ -2,7 +2,7 @@ import db from '../models/database.js';
 import { incrementFarmStat, updateDailyQuestProgress, checkAndUnlockFarmAchievements } from '../utils/farmProgress.js';
 
 // Конфигурация производства
-const PRODUCTION_CONFIG = {
+export const PRODUCTION_CONFIG = {
   chicken: { resourceType: 'egg', productionTime: 7200, value: 5 },
   duck: { resourceType: 'egg', productionTime: 10800, value: 7 },
   cow: { resourceType: 'milk', productionTime: 14400, value: 15 },
@@ -17,7 +17,7 @@ const UPGRADES = {
   'Стригальная машина': { speed: 0.50, resourceType: 'wool' }
 };
 
-const getUserUpgrades = (userId) => {
+export const getUserUpgrades = (userId) => {
   const items = db.prepare(`
     SELECT fi.name
     FROM user_inventory ui
@@ -41,7 +41,7 @@ const getUserUpgrades = (userId) => {
   return upgrades;
 };
 
-const calculateProductionTime = (animalType, baseTime, happiness, hunger, upgrades) => {
+export const calculateProductionTime = (animalType, baseTime, happiness, hunger, upgrades) => {
   const config = PRODUCTION_CONFIG[animalType];
   if (!config) return baseTime;
 
@@ -119,7 +119,7 @@ export const getProductionStatus = (req, res) => {
     const upgrades = getUserUpgrades(req.userId);
 
     const animals = db.prepare(`
-      SELECT ua.id, ua.user_id, fa.type, ua.happiness, ua.hunger,
+      SELECT ua.id, ua.user_id, fa.type, ua.happiness, ua.hunger, ua.purchased_at,
              ap.id as production_id, ap.resource_type, ap.ready_at, ap.collected
       FROM user_animals ua
       JOIN farm_animals fa ON ua.animal_id = fa.id
@@ -154,16 +154,18 @@ export const getProductionStatus = (req, res) => {
           timeRemaining = Math.max(0, Math.floor((readyTime - now) / 1000));
         }
       } else {
-        // Первое производство - начинаем таймер
+        // Первое производство — используем время покупки, а не открытия приложения
+        const startAt = animal.purchased_at ? new Date(animal.purchased_at) : now;
         const adjustedTime = calculateProductionTime(animal.type, config.productionTime, animal.happiness, animal.hunger, upgrades);
-        const readyAt = new Date(now.getTime() + adjustedTime * 1000);
-        
+        const readyAt = new Date(startAt.getTime() + adjustedTime * 1000);
+
         db.prepare(`
           INSERT INTO animal_production (user_animal_id, resource_type, ready_at, collected)
           VALUES (?, ?, ?, 0)
         `).run(animal.id, config.resourceType, readyAt.toISOString());
 
-        timeRemaining = adjustedTime;
+        timeRemaining = Math.max(0, Math.floor((readyAt - now) / 1000));
+        isReady = timeRemaining === 0;
       }
 
       return {
