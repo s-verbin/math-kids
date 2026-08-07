@@ -37,22 +37,21 @@ const ANIMAL_CONFIGS = {
     wings: true
   },
   cow: {
-    color: '#f5f5f5',
-    bodyColor: '#f5f5f5',
-    darkColor: '#333333',
-    snoutColor: '#ff9999',
-    size: 1.2,
-    bodyScale: [1.2, 1.0, 1.5],
-    headSize: 0.65,
-    headZ: 1.7,
+    color: '#ffffff',
+    bodyColor: '#ffffff',
+    darkColor: '#2b2b2b',
+    snoutColor: '#ffb7b2',
+    size: 1.1,
+    bodyScale: [0.95, 0.85, 1.35],
+    headSize: 0.45,
+    headZ: 1.2,
     ears: 'flat',
     tail: 'thin',
     legs: 4,
-    neck: 0.2,
+    neck: 0.25,
     horns: true,
     spots: true,
-    udder: true,
-    bodyGeometry: 'box'
+    udder: true
   },
   horse: {
     color: '#8b4513',
@@ -414,14 +413,19 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
   }, [config, animalData]);
 
   const spots = config.spots && (
-    <>
-      {[[0.15, 0.1, 0.2], [-0.15, -0.1, -0.15], [0.1, 0.05, -0.25], [-0.1, 0.15, 0.25]].map((pos, i) => (
-        <mesh key={i} position={pos}>
-          <circleGeometry args={[0.1, 8]} />
-          <meshStandardMaterial color="#333333" />
+    <group position={[0, config.size * 1.1, 0]}>
+      {[
+        { pos: [config.size * 0.85, 0.2, 0], rot: [0, Math.PI / 2, 0] },
+        { pos: [-config.size * 0.85, 0.1, 0.2], rot: [0, -Math.PI / 2, 0] },
+        { pos: [0, config.size * 0.8, -0.2], rot: [-Math.PI / 2, 0, 0] },
+        { pos: [config.size * 0.5, 0.4, config.size * 0.6], rot: [0, Math.PI / 4, 0] }
+      ].map((spot, i) => (
+        <mesh key={i} position={spot.pos} rotation={spot.rot}>
+          <circleGeometry args={[config.size * 0.35, 12]} />
+          <meshStandardMaterial color={config.darkColor} side={THREE.DoubleSide} />
         </mesh>
       ))}
-    </>
+    </group>
   );
 
   // Шерсть для овец (оптимизировано)
@@ -502,12 +506,12 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       case 'flat':
         return (
           <>
-            <mesh castShadow position={[-config.headSize * 0.5, headY + config.headSize * 0.2, headZ]} rotation={[0, 0, 0]}>
-              <cylinderGeometry args={[0.12, 0.1, 0.05, 8]} rotation={[0, 0, Math.PI / 2]} />
+            <mesh castShadow position={[-config.headSize * 0.8, headY, headZ]} rotation={[0, 0, -0.3]}>
+              <boxGeometry args={[0.3, 0.1, 0.1]} />
               <meshStandardMaterial color={earColor} />
             </mesh>
-            <mesh castShadow position={[config.headSize * 0.5, headY + config.headSize * 0.2, headZ]} rotation={[0, 0, 0]}>
-              <cylinderGeometry args={[0.12, 0.1, 0.05, 8]} rotation={[0, 0, Math.PI / 2]} />
+            <mesh castShadow position={[config.headSize * 0.8, headY, headZ]} rotation={[0, 0, 0.3]}>
+              <boxGeometry args={[0.3, 0.1, 0.1]} />
               <meshStandardMaterial color={earColor} />
             </mesh>
           </>
@@ -571,8 +575,8 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
   }, [config]);
 
   const udder = config.udder && (
-    <mesh castShadow position={[0, config.size * 0.75, -config.size * 0.25]}>
-      <sphereGeometry args={[config.size * 0.28, 12, 12]} />
+    <mesh castShadow position={[0, config.size * 0.6, -config.size * 0.1]}>
+      <sphereGeometry args={[config.size * 0.25, 12, 12]} />
       <meshStandardMaterial color='#ffacc7' />
     </mesh>
   );
@@ -736,10 +740,17 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
         </mesh>
       )}
 
-      {/* Пятачок/клюв */}
-      <mesh castShadow position={[0, config.size * (1.25 + config.neck), headZ + config.headSize * 0.6]}>
+      {/* Пятачок/клюв/мордочка */}
+      <mesh castShadow position={[
+        0, 
+        type === 'cow' ? headY - 0.1 : config.size * (1.25 + config.neck), 
+        headZ + (type === 'cow' ? config.headSize * 0.7 : config.headSize * 0.6)
+      ]}>
         {['chicken', 'duck'].includes(type) ? (
           <coneGeometry args={[0.08, 0.15, 8]} rotation={[Math.PI / 2, 0, 0]} />
+        ) : type === 'cow' ? (
+          // Для коровы делаем аккуратный розовый параллелепипед мордочки
+          <boxGeometry args={[config.headSize * 0.8, config.headSize * 0.5, config.headSize * 0.5]} />
         ) : (
           <cylinderGeometry args={[config.headSize * 0.3, config.headSize * 0.3, 0.08, 16]} />
         )}
