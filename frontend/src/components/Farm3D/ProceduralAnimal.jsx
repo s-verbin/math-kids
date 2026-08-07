@@ -167,6 +167,13 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
   const furRefs = useRef([]);
   const featherRefs = useRef([]);
   const maneRefs = useRef([]);
+  const eyeRefs = useRef([]);
+  const blinkTimerRef = useRef(Math.random() * 4 + 2);
+  const isBlinkingRef = useRef(false);
+  const dustRefs = useRef([]);
+  const dustData = useRef([]);
+  const dustIdx = useRef(0);
+  const dustTimerRef = useRef(0);
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
   const [isLying, setIsLying] = useState(false);
@@ -217,6 +224,20 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
     // Обновляем позицию
     groupRef.current.position.x = posRef.current.x;
     groupRef.current.position.z = posRef.current.z;
+
+    // Моргание глазами
+    blinkTimerRef.current -= delta;
+    if (blinkTimerRef.current <= 0) {
+      isBlinkingRef.current = true;
+      if (blinkTimerRef.current < -0.15) {
+        isBlinkingRef.current = false;
+        blinkTimerRef.current = Math.random() * 5 + 2;
+      }
+    }
+    const eyeScaleY = isBlinkingRef.current ? 0.1 : 1;
+    eyeRefs.current.forEach(eye => {
+      if (eye) eye.scale.y = eyeScaleY;
+    });
 
     if (clicked) {
       if (shadowRef.current) shadowRef.current.position.y = 0.01 - groupRef.current.position.y;
@@ -333,6 +354,26 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
       groupRef.current.rotation.x = Math.sin(walkTime) * 0.05;
       if (bodyRef.current) bodyRef.current.scale.set(config.bodyScale[0], config.bodyScale[1], config.bodyScale[2]);
 
+      // Пыль из-под ног
+      dustTimerRef.current -= delta;
+      if (dustTimerRef.current <= 0) {
+        const d = dustIdx.current % 8;
+        const mesh = dustRefs.current[d];
+        if (mesh) {
+          mesh.visible = true;
+          mesh.position.set(
+            posRef.current.x + (Math.random() - 0.5) * config.size,
+            posRef.current.y + 0.02,
+            posRef.current.z + (Math.random() - 0.5) * config.size
+          );
+          mesh.scale.setScalar(0.1 + Math.random() * 0.1);
+          mesh.material.opacity = 0.6;
+        }
+        dustData.current[d] = { life: 1.0, vy: 0.2 + Math.random() * 0.1 };
+        dustIdx.current += 1;
+        dustTimerRef.current = 0.25;
+      }
+
       const legCount = config.legs === 2 ? 2 : 4;
       for (let i = 0; i < legCount; i++) {
         const leg = legRefs.current[i];
@@ -366,6 +407,21 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
 
     if (shadowRef.current) shadowRef.current.position.y = 0.01 - groupRef.current.position.y;
 
+    // Обновление пылинок
+    dustRefs.current.forEach((mesh, i) => {
+      const d = dustData.current[i];
+      if (!mesh || !d || d.life <= 0) {
+        if (mesh) mesh.visible = false;
+        return;
+      }
+      d.life -= delta * 1.5;
+      mesh.position.y += d.vy * delta;
+      const s = 0.1 + (1 - d.life) * 0.2;
+      mesh.scale.setScalar(s);
+      mesh.material.opacity = Math.max(0, d.life * 0.6);
+      if (d.life <= 0) mesh.visible = false;
+    });
+
     // Анимация шерсти/перьев/гривы
     const windTime = state.clock.elapsedTime * 2;
     furRefs.current.forEach((fur, i) => {
@@ -394,21 +450,29 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
     if (onClick) onClick(animalData);
     
     const startTime = Date.now();
-    const duration = 200;
+    const duration = 300; // чуть дольше для пружинящего эффекта
     
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       
       if (groupRef.current) {
-        const scale = progress < 0.5 
-          ? 1 - (0.2 * (progress * 2))
-          : 0.8 + (0.2 * ((progress - 0.5) * 2));
-        groupRef.current.scale.set(scale, scale, scale);
+        // Использование синусоиды с затуханием (эффект пружины)
+        const squash = Math.sin(progress * Math.PI * 2) * Math.exp(-progress * 3) * 0.3;
+        
+        // Сжимается по вертикали, но раздается в ширину (сохранение объема)
+        groupRef.current.scale.set(
+          1 + squash, 
+          1 - squash, 
+          1 + squash
+        );
       }
       
       if (progress < 1) requestAnimationFrame(animate);
-      else setClicked(false);
+      else {
+        if (groupRef.current) groupRef.current.scale.set(1, 1, 1);
+        setClicked(false);
+      }
     };
     
     animate();
@@ -720,7 +784,20 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
     );
   }
 
-  return (
+  const dust = useMemo(() => {
+    const particles = [];
+    for (let i = 0; i < 8; i++) {
+      particles.push(
+        <mesh key={`dust-${i}`} ref={el => dustRefs.current[i] = el} visible={false} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[0.12, 8]} />
+          <meshStandardMaterial color="#8bc34a" transparent opacity={0.6} side={THREE.DoubleSide} />
+        </mesh>
+      );
+    }
+    return <group>{particles}</group>;
+  }, []);
+
+  return ( <>
     <group
       ref={groupRef}
       position={position}
@@ -795,7 +872,7 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
 
       {/* ГЛАЗА С БЛИКАМИ */}
       {[-1, 1].map((side, i) => (
-        <group key={i} position={[side * config.headSize * 0.32, headY + 0.05, headZ + config.headSize * 0.45]}>
+        <group key={i} ref={el => eyeRefs.current[i] = el} position={[side * config.headSize * 0.32, headY + 0.05, headZ + config.headSize * 0.45]}>
           {/* Черный зрачок */}
           <mesh castShadow>
             <sphereGeometry args={[0.05, 8, 8]} />
@@ -881,7 +958,9 @@ const ProceduralAnimal = ({ position = [0, 0, 0], animalData = null, accessoryDa
         </group>
       )}
     </group>
-  );
+    {dust}
+  </>
+);
 };
 
 export default ProceduralAnimal;
